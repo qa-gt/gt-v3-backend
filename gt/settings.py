@@ -83,7 +83,7 @@ WSGI_APPLICATION = 'gt.wsgi.application'
 
 if QAGT_SERVER.startswith("DEVELOPMENT"):
     QAGT_SERVER = "DEVELOPMENT"
-    print("-----QAGT_SERVER is DEVELOPMENT-----")
+    print("-----GT_SERVER is DEVELOPMENT-----")
     DEBUG = True
     DATABASES = {
         'default': {
@@ -97,7 +97,7 @@ if QAGT_SERVER.startswith("DEVELOPMENT"):
     }
 else:
     QAGT_SERVER = "PRODUCTION"
-    print("-----QAGT_SERVER is PRODUCTION-----")
+    print("-----GT_SERVER is PRODUCTION-----")
     DEBUG = False
     DATABASES = {
         'default': {
@@ -133,9 +133,12 @@ AUTH_PASSWORD_VALIDATORS = [
 ]
 
 REST_FRAMEWORK = {
-    'DEFAULT_PERMISSION_CLASSES': [
-        'rest_framework.permissions.IsAdminUser',
+    'DEFAULT_AUTHENTICATION_CLASSES': [
+        'gt.authentications.GtAuthentication',
     ],
+    # 'DEFAULT_PERMISSION_CLASSES': [
+    #     'rest_framework.permissions.IsAdminUser',
+    # ],
     'DEFAULT_PAGINATION_CLASS':
     'rest_framework.pagination.PageNumberPagination',
     'PAGE_SIZE': 15

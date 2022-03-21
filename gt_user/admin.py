@@ -4,13 +4,13 @@ from django.contrib.auth.admin import UserAdmin as BaseUserAdmin
 from .models import *
 
 ADDITIONAL_FIELDS = (('附加数据', {
-    'fields': ('grade', 'sex', 'introduction', 'tags')
+    'fields': ('grade', 'introduction', 'tags', 'portrait', 'gender')
 }), )
 
 
 @admin.register(User)
 class UserAdmin(BaseUserAdmin):
-    list_display = ('__str__', 'pwd', 'grade', 'gender', 'tags',
-                    'introduction', 'state', 'portrait')
+    # list_display = ('__str__', 'pwd', 'grade', 'tags',
+    #                 'introduction', 'state')
     fieldsets = BaseUserAdmin.fieldsets + ADDITIONAL_FIELDS
     add_fieldsets = BaseUserAdmin.fieldsets + ADDITIONAL_FIELDS

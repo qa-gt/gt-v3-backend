@@ -3,6 +3,8 @@ from django.contrib.auth.models import AbstractUser
 
 
 class User(AbstractUser):
+    username = models.CharField(max_length=20, unique=True)
+    portrait = models.TextField(default="")
     pwd = models.CharField(max_length=30)
     grade = models.CharField(max_length=10,
                              null=True,

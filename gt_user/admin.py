@@ -11,6 +11,6 @@ ADDITIONAL_FIELDS = (('附加数据', {
 @admin.register(User)
 class UserAdmin(BaseUserAdmin):
     list_display = ('__str__', 'pwd', 'grade', 'gender', 'tags',
-                    'introduction', 'state')
+                    'introduction', 'state', 'portrait')
     fieldsets = BaseUserAdmin.fieldsets + ADDITIONAL_FIELDS
     add_fieldsets = BaseUserAdmin.fieldsets + ADDITIONAL_FIELDS

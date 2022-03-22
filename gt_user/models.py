@@ -4,18 +4,20 @@ from django.contrib.auth.models import AbstractUser
 
 class User(AbstractUser):
     username = models.CharField(max_length=20, unique=True)
-    portrait = models.TextField(default="")
-    pwd = models.CharField(max_length=30)
+    portrait = models.TextField(default="", null=True, blank=True)
+    # pwd = models.CharField(max_length=30)
     grade = models.CharField(max_length=10,
                              null=True,
                              blank=True,
                              default="保密")
     gender = models.SmallIntegerField(default=0,
                                       choices=[(0, "保密"), (1, "男"), (2, "女")])
-    introduction = models.TextField(max_length=100,
-                                    null=True,
-                                    blank=True,
-                                    default="")
+    introduction = models.TextField(
+        max_length=100,
+        null=True,
+        blank=True,
+        default="",
+    )
     state = models.SmallIntegerField(default=0,
                                      null=True,
                                      blank=True,

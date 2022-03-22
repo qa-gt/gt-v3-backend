@@ -1,7 +1,7 @@
 from django.contrib import admin
 from django.contrib.auth.admin import UserAdmin as BaseUserAdmin
 
-from .models import *
+from .models import User, Follow
 
 ADDITIONAL_FIELDS = (('附加数据', {
     'fields': ('grade', 'introduction', 'tags', 'portrait', 'gender')
@@ -14,3 +14,6 @@ class UserAdmin(BaseUserAdmin):
     #                 'introduction', 'state')
     fieldsets = BaseUserAdmin.fieldsets + ADDITIONAL_FIELDS
     add_fieldsets = BaseUserAdmin.fieldsets + ADDITIONAL_FIELDS
+
+
+admin.site.register(Follow)

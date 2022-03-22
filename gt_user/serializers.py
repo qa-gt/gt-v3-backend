@@ -9,3 +9,7 @@ class UserSerializer(serializers.ModelSerializer):
             'id', 'username', 'grade', 'gender', 'introduction', 'tags',
             'portrait', 'email', 'state'
         ]
+        read_only_fields = (
+            'id',
+            'username',
+        )

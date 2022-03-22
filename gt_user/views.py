@@ -1,4 +1,6 @@
 import datetime
+
+from django.contrib.auth import authenticate
 from django.shortcuts import render
 from gt import jencode
 from rest_framework.exceptions import ValidationError
@@ -19,16 +21,34 @@ class LoginView(APIView):
     def post(request):
         username = request.data.get("username")
         password = request.data.get("password")
-        user = User.objects.filter(username=username)
+        user = authenticate(username=username, password=password)
         if not user:
             print(username, password)
-            raise ValidationError({"detail": "用户名未找到"})
-        user = user.first()
+            raise ValidationError({"detail": "用户名或密码错误"})
         if user.state <= -3:
             raise ValidationError({"detail": "用户被封禁"})
-        elif user.pwd != password:
-            raise ValidationError({"detail": "密码错误"})
         return Response({
+            "token":
+            jencode({
+                "id": user.id,
+                "exp": datetime.datetime.now(tz=datetime.timezone.utc)
+            }),
+            "user":
+            UserSerializer(user).data
+        })
+
+
+class RegisterView(APIView):
+    authentication_classes = []
+    permission_classes = []
+
+    @staticmethod
+    def post(request):
+        username = request.data.get("username")
+        password = request.data.get("password")
+        user = User.objects.create_user(username=username, password=password)
+        return Response({
+            "detail": "注册成功",
             "token":
             jencode({
                 "id": user.id,

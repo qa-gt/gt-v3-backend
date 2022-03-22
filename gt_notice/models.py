@@ -3,7 +3,7 @@ from django.db import models
 from gt_user.models import User
 
 
-class Notices(models.Model):
+class Notice(models.Model):
     recipient = models.ForeignKey(User,
                                   on_delete=models.CASCADE,
                                   related_name='notice')
@@ -22,4 +22,4 @@ class Notices(models.Model):
         return f"{self.recipient} 收到 {self.title}"
 
     class Meta:
-        db_table = "notices"
+        db_table = "notice"

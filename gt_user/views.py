@@ -23,9 +23,8 @@ class LoginView(APIView):
         password = request.data.get("password")
         user = authenticate(username=username, password=password)
         if not user:
-            print(username, password)
             raise ValidationError({"detail": "用户名或密码错误"})
-        if user.state <= -3:
+        if not user.is_active:
             raise ValidationError({"detail": "用户被封禁"})
         return Response({
             "token":

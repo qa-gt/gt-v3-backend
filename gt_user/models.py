@@ -1,60 +1,77 @@
 from django.db import models
-from django.contrib.auth.models import AbstractUser
+from django.contrib.auth.models import AbstractUser, Group as BaseGroup
+
+
+class GenderChoices(models.IntegerChoices):
+    SECRET = 0, "保密"
+    MALE = 1, "男"
+    FEMALE = 2, "女"
+
+
+class BanStateChoices(models.IntegerChoices):
+    NO_POST = -1, "禁止发贴"
+    NO_COMMENT = -2, "禁止发言"
 
 
 class User(AbstractUser):
-    username = models.CharField(max_length=20, unique=True)
-    portrait = models.TextField(default="", null=True, blank=True)
-    # pwd = models.CharField(max_length=30)
+    portrait = models.CharField(max_length=50,
+                                default="",
+                                null=True,
+                                blank=True,
+                                verbose_name="头像")
     grade = models.CharField(max_length=10,
-                             null=True,
-                             blank=True,
-                             default="保密")
-    gender = models.SmallIntegerField(default=0,
-                                      choices=[(0, "保密"), (1, "男"), (2, "女")])
+                             default="保密",
+                             verbose_name="年级")
+    gender = models.SmallIntegerField(default=GenderChoices.SECRET,
+                                      choices=GenderChoices.choices,
+                                      verbose_name="性别")
     introduction = models.TextField(
         max_length=100,
         null=True,
         blank=True,
         default="",
+        verbose_name="介绍"
     )
-    state = models.SmallIntegerField(default=0,
-                                     null=True,
-                                     blank=True,
-                                     choices=(
-                                         (2, "超级管理员"),
-                                         (1, "管理员"),
-                                         (0, "普通用户"),
-                                         (-1, "禁止发贴"),
-                                         (-2, "禁止发言"),
-                                         (-3, "封禁帐号"),
-                                     ))
-    tags = models.TextField(max_length=20, null=True, blank=True, default="")
+    ban_state = models.SmallIntegerField(default=None,
+                                         null=True,
+                                         blank=True,
+                                         choices=BanStateChoices.choices,
+                                         verbose_name="封禁状态")
+    tags = models.CharField(max_length=20,
+                            null=True,
+                            blank=True,
+                            default="",
+                            verbose_name="认证信息")
 
     def __str__(self):
-        return f"{self.id}:{self.username}"
+        return f"[{self.id}] {self.username}"
 
     class Meta:
         db_table = "user"
+        verbose_name = verbose_name_plural = "用户"
+
+
+class Group(BaseGroup):
+    class Meta:
+        verbose_name = '组'
+        verbose_name_plural = '组'
+        proxy = True
 
 
 class Follow(models.Model):
     follower = models.ForeignKey(User,
                                  on_delete=models.CASCADE,
-                                 related_name='follower')
+                                 related_name='follower',
+                                 verbose_name='当前用户')
     following = models.ForeignKey(User,
                                   on_delete=models.CASCADE,
-                                  related_name='following')
-    state = models.SmallIntegerField(
-        default=1,
-        choices=(
-            (1, "正常"),
-            (2, "已取关"),
-        ),
-    )
+                                  related_name='following',
+                                  verbose_name='关注用户')
+    follow_time = models.DateTimeField(auto_now_add=True, verbose_name='关注时间')
 
     def __str__(self):
         return f"{self.follower} 关注 {self.following}"
 
     class Meta:
         db_table = "follow"
+        verbose_name = verbose_name_plural = "关注"

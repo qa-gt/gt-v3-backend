@@ -12,6 +12,7 @@ https://docs.djangoproject.com/en/4.0/ref/settings/
 
 from pathlib import Path
 import os
+import datetime
 
 QAGT_SERVER = os.environ.get('GTSERVER', "DEVELOPMENT")
 QAGT_POSTGRESQL = {
@@ -45,10 +46,10 @@ INSTALLED_APPS = [
     'django.contrib.messages',
     'django.contrib.staticfiles',
     'rest_framework',
-    "gt_user",
-    "gt_article",
-    "gt_notice",
-    "gt_admin",
+    "gt_user.apps.GtUserConfig",
+    "gt_article.apps.GtArticleConfig",
+    "gt_notice.apps.GtNoticeConfig",
+    "gt_admin.apps.GtAdminConfig",
 ]
 
 MIDDLEWARE = [
@@ -177,3 +178,7 @@ STATICFILES_DIRS = [
 # https://docs.djangoproject.com/en/4.0/ref/settings/#default-auto-field
 
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
+
+JWT_PREFIX = 'JWT'
+
+JWT_EXPIRE_TIME = datetime.timedelta(days=1)

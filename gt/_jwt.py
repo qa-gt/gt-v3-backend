@@ -1,19 +1,18 @@
-import datetime
-
 import jwt
-
 from django.conf import settings
 
 
 def jencode(payload):
-    return jwt.encode(payload=payload, key=settings.SECRET_KEY, algorithm="HS256")
+    jwt_data = jwt.encode(
+        payload=payload, key=settings.SECRET_KEY, algorithm="HS256")
+    return f"{settings.JWT_PREFIX} {jwt_data}"
 
 
 def jdecode(token):
     try:
         return jwt.decode(jwt=token,
                           key=settings.SECRET_KEY,
-                          leeway=datetime.timedelta(seconds=86400),
+                          leeway=settings.JWT_EXPIRE_TIME,
                           algorithms=["HS256"])
     except Exception as e:
         print(e)

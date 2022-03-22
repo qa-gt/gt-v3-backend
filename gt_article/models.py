@@ -28,9 +28,8 @@ class Topic(models.Model):
 
 
 class Article(models.Model):
-    id = models.AutoField(primary_key=True, unique=True)
     author = models.ForeignKey(User,
-                               on_delete=models.DO_NOTHING,
+                               on_delete=models.CASCADE,
                                related_name='article')
     title = models.CharField(max_length=100)
     content = models.TextField()
@@ -64,15 +63,14 @@ class Article(models.Model):
 
 
 class Comment(models.Model):
-    id = models.AutoField(primary_key=True, unique=True)
     author = models.ForeignKey(User,
-                               on_delete=models.DO_NOTHING,
+                               on_delete=models.CASCADE,
                                related_name='comment')
     article = models.ForeignKey(Article,
-                                on_delete=models.DO_NOTHING,
+                                on_delete=models.CASCADE,
                                 related_name='comment')
     reply = models.ForeignKey("self",
-                              on_delete=models.DO_NOTHING,
+                              on_delete=models.CASCADE,
                               related_name='replys',
                               default=None,
                               blank=True,
@@ -97,7 +95,6 @@ class Comment(models.Model):
 
 
 class Like(models.Model):
-    id = models.AutoField(primary_key=True, unique=True)
     type = models.SmallIntegerField(default=1,
                                     choices=(
                                         (1, "文章"),
@@ -106,15 +103,15 @@ class Like(models.Model):
     article = models.ForeignKey(Article,
                                 null=True,
                                 blank=True,
-                                on_delete=models.DO_NOTHING,
+                                on_delete=models.CASCADE,
                                 related_name='like')
     comment = models.ForeignKey(Comment,
                                 null=True,
                                 blank=True,
-                                on_delete=models.DO_NOTHING,
+                                on_delete=models.CASCADE,
                                 related_name='like')
     user = models.ForeignKey(User,
-                             on_delete=models.DO_NOTHING,
+                             on_delete=models.CASCADE,
                              related_name='like')
 
     def __str__(self):
@@ -125,14 +122,13 @@ class Like(models.Model):
 
 
 class Collect(models.Model):
-    id = models.AutoField(primary_key=True, unique=True)
     article = models.ForeignKey(Article,
                                 null=True,
                                 blank=True,
-                                on_delete=models.DO_NOTHING,
+                                on_delete=models.CASCADE,
                                 related_name='collect')
     user = models.ForeignKey(User,
-                             on_delete=models.DO_NOTHING,
+                             on_delete=models.CASCADE,
                              related_name='collect')
 
     def __str__(self):

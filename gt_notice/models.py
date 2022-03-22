@@ -4,7 +4,6 @@ from gt_user.models import User
 
 
 class Notices(models.Model):
-    id = models.AutoField(primary_key=True, unique=True)
     recipient = models.ForeignKey(User,
                                   on_delete=models.CASCADE,
                                   related_name='notice')

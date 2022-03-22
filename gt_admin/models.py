@@ -5,9 +5,8 @@ from gt_article.models import Article, Comment
 
 
 class Report(models.Model):
-    id = models.AutoField(primary_key=True, unique=True)
     reporter = models.ForeignKey(User,
-                                 on_delete=models.DO_NOTHING,
+                                 on_delete=models.CASCADE,
                                  related_name='report')
     type = models.SmallIntegerField(default=1,
                                     choices=(
@@ -15,12 +14,12 @@ class Report(models.Model):
                                         (2, "评论"),
                                     ))
     article = models.ForeignKey(Article,
-                                on_delete=models.DO_NOTHING,
+                                on_delete=models.CASCADE,
                                 blank=True,
                                 null=True,
                                 related_name='report')
     comment = models.ForeignKey(Comment,
-                                on_delete=models.DO_NOTHING,
+                                on_delete=models.CASCADE,
                                 blank=True,
                                 null=True,
                                 related_name='report')
@@ -34,7 +33,7 @@ class Report(models.Model):
     operated_time = models.BigIntegerField(null=True, blank=True)
     operator = models.ForeignKey(
         User,
-        on_delete=models.DO_NOTHING,
+        on_delete=models.CASCADE,
         blank=True,
         null=True,
         related_name="operated_reports",

@@ -37,7 +37,6 @@ class User(AbstractUser):
 
 
 class Follow(models.Model):
-    id = models.AutoField(primary_key=True, unique=True)
     follower = models.ForeignKey(User,
                                  on_delete=models.CASCADE,
                                  related_name='follower')

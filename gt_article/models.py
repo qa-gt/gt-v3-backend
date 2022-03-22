@@ -4,7 +4,6 @@ from gt_user.models import User
 
 
 class Topic(models.Model):
-    id = models.AutoField(primary_key=True, unique=True)
     name = models.CharField(max_length=20, unique=True)
     description = models.TextField(max_length=100,
                                    null=True,
@@ -33,8 +32,8 @@ class Article(models.Model):
                                related_name='article')
     title = models.CharField(max_length=100)
     content = models.TextField()
-    create_time = models.BigIntegerField()
-    update_time = models.BigIntegerField()
+    create_time = models.DateTimeField(auto_now_add=True)
+    update_time = models.DateTimeField(auto_now=True)
     state = models.SmallIntegerField(null=True,
                                      blank=True,
                                      default=0,
@@ -76,7 +75,7 @@ class Comment(models.Model):
                               blank=True,
                               null=True)
     content = models.CharField(max_length=300)
-    time = models.BigIntegerField()
+    time = models.DateTimeField(auto_now_add=True)
     state = models.SmallIntegerField(null=True,
                                      blank=True,
                                      default=0,

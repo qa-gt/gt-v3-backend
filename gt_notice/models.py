@@ -15,7 +15,7 @@ class Notices(models.Model):
                                          (0, "未读"),
                                          (-1, "已删除"),
                                      ))
-    time = models.BigIntegerField()
+    time = models.DateTimeField(auto_now_add=True)
     url = models.CharField(max_length=1000, default="", blank=True, null=True)
 
     def __str__(self):

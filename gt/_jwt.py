@@ -2,17 +2,17 @@ import datetime
 
 import jwt
 
-from .settings import SECRET_KEY
+from django.conf import settings
 
 
 def jencode(payload):
-    return jwt.encode(payload=payload, key=SECRET_KEY, algorithm="HS256")
+    return jwt.encode(payload=payload, key=settings.SECRET_KEY, algorithm="HS256")
 
 
 def jdecode(token):
     try:
         return jwt.decode(jwt=token,
-                          key=SECRET_KEY,
+                          key=settings.SECRET_KEY,
                           leeway=datetime.timedelta(seconds=86400),
                           algorithms=["HS256"])
     except Exception as e:

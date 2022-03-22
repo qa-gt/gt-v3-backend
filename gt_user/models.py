@@ -34,3 +34,26 @@ class User(AbstractUser):
 
     class Meta:
         db_table = "user"
+
+
+class Follow(models.Model):
+    id = models.AutoField(primary_key=True, unique=True)
+    follower = models.ForeignKey(User,
+                                 on_delete=models.CASCADE,
+                                 related_name='follower')
+    following = models.ForeignKey(User,
+                                  on_delete=models.CASCADE,
+                                  related_name='following')
+    state = models.SmallIntegerField(
+        default=1,
+        choices=(
+            (1, "正常"),
+            (2, "已取关"),
+        ),
+    )
+
+    def __str__(self):
+        return f"{self.follower} 关注 {self.following}"
+
+    class Meta:
+        db_table = "follow"

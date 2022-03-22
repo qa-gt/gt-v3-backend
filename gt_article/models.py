@@ -73,7 +73,7 @@ class Comment(models.Model):
                                 related_name='comment')
     reply = models.ForeignKey("self",
                               on_delete=models.DO_NOTHING,
-                              related_name='reply',
+                              related_name='replys',
                               default=None,
                               blank=True,
                               null=True)

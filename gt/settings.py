@@ -46,6 +46,9 @@ INSTALLED_APPS = [
     'django.contrib.staticfiles',
     'rest_framework',
     "gt_user",
+    "gt_article",
+    "gt_notice",
+    "gt_admin",
 ]
 
 MIDDLEWARE = [

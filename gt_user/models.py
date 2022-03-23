@@ -9,8 +9,10 @@ class GenderChoices(models.IntegerChoices):
 
 
 class BanStateChoices(models.IntegerChoices):
+    NORMAL = 0, '正常'
     NO_POST = -1, "禁止发贴"
     NO_COMMENT = -2, "禁止发言"
+    NO_LOGIN = -3, "禁止登录"
 
 
 class User(AbstractUser):
@@ -19,22 +21,16 @@ class User(AbstractUser):
                                 null=True,
                                 blank=True,
                                 verbose_name="头像")
-    grade = models.CharField(max_length=10,
-                             default="保密",
-                             verbose_name="年级")
+    grade = models.CharField(max_length=10, default="保密", verbose_name="年级")
     gender = models.SmallIntegerField(default=GenderChoices.SECRET,
                                       choices=GenderChoices.choices,
                                       verbose_name="性别")
-    introduction = models.TextField(
-        max_length=100,
-        null=True,
-        blank=True,
-        default="",
-        verbose_name="介绍"
-    )
-    ban_state = models.SmallIntegerField(default=None,
-                                         null=True,
-                                         blank=True,
+    introduction = models.TextField(max_length=100,
+                                    null=True,
+                                    blank=True,
+                                    default="",
+                                    verbose_name="介绍")
+    ban_state = models.SmallIntegerField(default=BanStateChoices.NORMAL,
                                          choices=BanStateChoices.choices,
                                          verbose_name="封禁状态")
     tags = models.CharField(max_length=20,

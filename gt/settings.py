@@ -92,6 +92,16 @@ if QAGT_SERVER.startswith("DEVELOPMENT"):
     DEBUG = True
     DATABASES = {
         'default': {
+            'ENGINE': 'django.db.backends.sqlite3',
+            'NAME': 'db.sqlite3',
+        }
+    }
+elif QAGT_SERVER.startswith("TEST"):
+    QAGT_SERVER = "TEST"
+    print("-----GT_SERVER is TEST-----")
+    DEBUG = True
+    DATABASES = {
+        'default': {
             'ENGINE': 'django.db.backends.postgresql',
             'NAME': 'gttest',
             'USER': QAGT_POSTGRESQL["USER"],
@@ -142,12 +152,13 @@ REST_FRAMEWORK = {
         'gt.authentications.GtAuthentication',
     ],
     'DEFAULT_PERMISSION_CLASSES': [
-        # 'rest_framework.permissions.IsAdminUser',
-        'gt.permissions.NoDelete',
+        'rest_framework.permissions.IsAuthenticatedOrReadOnly',
+        # 'gt.permissions.NoDelete',
     ],
     'DEFAULT_PAGINATION_CLASS':
     'rest_framework.pagination.PageNumberPagination',
-    'PAGE_SIZE': 15
+    'PAGE_SIZE':
+    15
 }
 
 AUTH_USER_MODEL = 'gt_user.User'

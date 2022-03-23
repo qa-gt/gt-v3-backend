@@ -1,4 +1,5 @@
 import gt_user.views
+import gt_article.views
 from django.contrib import admin
 from django.urls import include, path, re_path
 from rest_framework.routers import DefaultRouter
@@ -6,6 +7,9 @@ from rest_framework.routers import DefaultRouter
 # 创建路由器并注册我们的视图。
 router = DefaultRouter()
 router.register(r'user', gt_user.views.UserViewSet)
+router.register(r'article', gt_article.views.ArticleViewSet)
+router.register(r'topic', gt_article.views.TopicViewSet)
+router.register(r'like', gt_article.views.LikeViewSet)
 
 urlpatterns = [
     re_path(r'^', include(router.urls)),

@@ -7,6 +7,8 @@ from rest_framework.response import Response
 from rest_framework.views import APIView
 from rest_framework.viewsets import ModelViewSet
 
+from gt.permissions import RobotCheck
+
 from .models import *
 from .permissions import *
 from .serializers import *
@@ -37,7 +39,7 @@ class LoginView(APIView):
 
 class RegisterView(APIView):
     authentication_classes = []
-    permission_classes = []
+    permission_classes = [RobotCheck]
 
     @staticmethod
     def post(request):

@@ -23,3 +23,4 @@ class GtAuthentication(BaseAuthentication):
             return (User.objects.get(id=user['id']), jwt)
         else:
             return (None, None)
+

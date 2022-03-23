@@ -14,8 +14,8 @@ from pathlib import Path
 import os
 import datetime
 
-QAGT_SERVER = os.environ.get('GTSERVER', "DEVELOPMENT")
-QAGT_POSTGRESQL = {
+GT_SERVER = os.environ.get('GTSERVER', "DEVELOPMENT")
+GT_POSTGRESQL = {
     "HOST": os.environ.get('GTPOSTGRESQLHOST',
                            "yxzlownserveraddress.yxzl.top"),
     "PORT": os.environ.get('GTPOSTGRESQLPORT', "5432"),
@@ -53,6 +53,7 @@ INSTALLED_APPS = [
 ]
 
 MIDDLEWARE = [
+    'gt.middlewares.GtMiddleware',
     'gt.middlewares.CorsMiddleware',
     'django.middleware.security.SecurityMiddleware',
     'django.contrib.sessions.middleware.SessionMiddleware',
@@ -86,8 +87,8 @@ WSGI_APPLICATION = 'gt.wsgi.application'
 # Database
 # https://docs.djangoproject.com/en/4.0/ref/settings/#databases
 
-if QAGT_SERVER.startswith("DEVELOPMENT"):
-    QAGT_SERVER = "DEVELOPMENT"
+if GT_SERVER.startswith("DEVELOPMENT"):
+    GT_SERVER = "DEVELOPMENT"
     print("-----GT_SERVER is DEVELOPMENT-----")
     DEBUG = True
     DATABASES = {
@@ -96,32 +97,32 @@ if QAGT_SERVER.startswith("DEVELOPMENT"):
             'NAME': 'db.sqlite3',
         }
     }
-elif QAGT_SERVER.startswith("TEST"):
-    QAGT_SERVER = "TEST"
+elif GT_SERVER.startswith("TEST"):
+    GT_SERVER = "TEST"
     print("-----GT_SERVER is TEST-----")
     DEBUG = True
     DATABASES = {
         'default': {
             'ENGINE': 'django.db.backends.postgresql',
             'NAME': 'gttest',
-            'USER': QAGT_POSTGRESQL["USER"],
-            'PASSWORD': QAGT_POSTGRESQL['PASSWORD'],
-            'HOST': QAGT_POSTGRESQL["HOST"],
-            'PORT': QAGT_POSTGRESQL["PORT"],
+            'USER': GT_POSTGRESQL["USER"],
+            'PASSWORD': GT_POSTGRESQL['PASSWORD'],
+            'HOST': GT_POSTGRESQL["HOST"],
+            'PORT': GT_POSTGRESQL["PORT"],
         },
     }
 else:
-    QAGT_SERVER = "PRODUCTION"
+    GT_SERVER = "PRODUCTION"
     print("-----GT_SERVER is PRODUCTION-----")
     DEBUG = False
     DATABASES = {
         'default': {
             'ENGINE': 'django.db.backends.postgresql',
             'NAME': 'gt',
-            'USER': QAGT_POSTGRESQL["USER"],
-            'PASSWORD': QAGT_POSTGRESQL['PASSWORD'],
-            'HOST': QAGT_POSTGRESQL["HOST"],
-            'PORT': QAGT_POSTGRESQL["PORT"],
+            'USER': GT_POSTGRESQL["USER"],
+            'PASSWORD': GT_POSTGRESQL['PASSWORD'],
+            'HOST': GT_POSTGRESQL["HOST"],
+            'PORT': GT_POSTGRESQL["PORT"],
         },
     }
 
@@ -193,3 +194,6 @@ DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 JWT_PREFIX = 'JWT'
 
 JWT_EXPIRE_TIME = datetime.timedelta(days=1)
+
+VAPTCHA_VID = "623adf7fe82e6539de8faf81"
+VAPTCHA_KEY = "6352d2255a3b4a60814774fe4ef8a79c"

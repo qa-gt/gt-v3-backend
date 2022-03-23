@@ -53,3 +53,7 @@ class Report(models.Model):
         related_name="operated_report",
         verbose_name='处理人',
     )
+
+    class Meta:
+        db_table = 'report'
+        verbose_name = verbose_name_plural = '举报'

@@ -30,4 +30,4 @@ class Notice(models.Model):
 
     class Meta:
         db_table = "notice"
-        verbose_name = verbose_name_plural = "消息"
+        verbose_name = verbose_name_plural = "通知"

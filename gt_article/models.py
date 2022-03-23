@@ -40,6 +40,7 @@ class Topic(models.Model):
 
     class Meta:
         db_table = 'topic'
+        verbose_name = verbose_name_plural = '话题'
 
 
 class Article(models.Model):
@@ -74,6 +75,7 @@ class Article(models.Model):
 
     class Meta:
         db_table = 'article'
+        verbose_name = verbose_name_plural = '文章'
 
 
 class Comment(models.Model):
@@ -113,6 +115,7 @@ class Comment(models.Model):
 
     class Meta:
         db_table = 'comment'
+        verbose_name = verbose_name_plural = '评论'
 
 
 class Like(models.Model):
@@ -150,6 +153,7 @@ class Like(models.Model):
 
     class Meta:
         db_table = 'like'
+        verbose_name = verbose_name_plural = '点赞'
 
 
 class Collect(models.Model):
@@ -173,3 +177,4 @@ class Collect(models.Model):
 
     class Meta:
         db_table = 'collect'
+        verbose_name = verbose_name_plural = '收藏'

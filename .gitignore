@@ -3,3 +3,4 @@ migrations
 .idea
 .vscode
 *.sqlite3
+article_images

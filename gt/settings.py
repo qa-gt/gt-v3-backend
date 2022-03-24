@@ -50,6 +50,7 @@ INSTALLED_APPS = [
     "gt_article.apps.GtArticleConfig",
     "gt_notice.apps.GtNoticeConfig",
     "gt_admin.apps.GtAdminConfig",
+    'gt_utils.apps.GtUtilsConfig',
 ]
 
 MIDDLEWARE = [
@@ -62,6 +63,7 @@ MIDDLEWARE = [
     'django.contrib.auth.middleware.AuthenticationMiddleware',
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
+    'gt.middlewares.GtLog',
 ]
 
 ROOT_URLCONF = 'gt.urls'

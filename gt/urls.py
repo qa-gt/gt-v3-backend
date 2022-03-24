@@ -1,5 +1,6 @@
 import gt_user.views
 import gt_article.views
+import gt_utils.views
 from django.contrib import admin
 from django.urls import include, path, re_path
 from rest_framework.routers import DefaultRouter
@@ -17,5 +18,6 @@ urlpatterns = [
     path("user/register", gt_user.views.RegisterView.as_view()),
     re_path(r'^api-auth/',
             include('rest_framework.urls', namespace='rest_framework')),
+    path("utils/upload", gt_utils.views.UploadView.as_view()),
     path('admin/', admin.site.urls),
 ]

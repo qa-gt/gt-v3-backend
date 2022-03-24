@@ -33,3 +33,13 @@ class GtMiddleware:
             or request.META["REMOTE_ADDR"])
         response = self.get_response(request)
         return response
+
+
+class GtLog:
+    def __init__(self, get_response):
+        self.get_response = get_response
+
+    def __call__(self, request):
+        # print(request.headers)
+        response = self.get_response(request)
+        return response

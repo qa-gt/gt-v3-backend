@@ -1,12 +1,14 @@
 import time
 import musicapi
+from django.http import HttpResponseRedirect
+from django.views.decorators.http import require_GET
 from rest_framework.response import Response
 from rest_framework.views import APIView
 from rest_framework.permissions import IsAuthenticatedOrReadOnly
 from django.conf import settings
 
 
-class UploadView(APIView):
+class UploadImageView(APIView):
     permission_classes = [IsAuthenticatedOrReadOnly]
 
     @staticmethod
@@ -29,21 +31,16 @@ class UploadView(APIView):
         })
 
 
-class MusicUrlView(APIView):
-    authentication_classes = []
-    permission_classes = []
-
-    @staticmethod
-    def post(request):
-        url = ""
-        if request.POST["site"] == "qq":
-            if request.POST["by"] == "id":
-                url = musicapi.qq.get_by_id(request.POST["value"])
-            elif request.POST["by"] == "name":
-                url = musicapi.qq.get_by_name(request.POST["value"])
-        elif request.POST["site"] == "wyy":
-            if request.POST["by"] == "id":
-                url = musicapi.wyy.get_by_id(request.POST["value"])
-            elif request.POST["by"] == "name":
-                url = musicapi.wyy.get_by_name(request.POST["value"])
-        return Response({"status": "success", "detail": "获取成功", "url": url})
+def get_music_url(request):
+    url = ""
+    if request.GET["site"] == "QQ":
+        if request.GET["by"] == "ID":
+            url = musicapi.qq.get_by_id(request.GET["value"])
+        elif request.GET["by"] == "NAME":
+            url = musicapi.qq.get_by_name(request.GET["value"])
+    elif request.GET["site"] == "WYY":
+        if request.GET["by"] == "ID":
+            url = musicapi.wyy.get_by_id(request.GET["value"])
+        elif request.GET["by"] == "NAME":
+            url = musicapi.wyy.get_by_name(request.GET["value"])
+    return HttpResponseRedirect(url)

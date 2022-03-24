@@ -2,9 +2,17 @@ from rest_framework.permissions import BasePermission, SAFE_METHODS
 
 
 class UserPermission(BasePermission):
-    def has_object_permission(self, request, view, obj):
+    def has_permission(self, request, view):
         if request.method in SAFE_METHODS:
             return True
+        elif self.act:
+            return request.user.is_superuser
+    def has_object_permission(self, request, view, obj):
+        print(request.method)
+        if request.method in SAFE_METHODS:
+            return True
+        # if request.method == 'POST':
+        #     return False
         if not request.user or not (request.user.id == obj.id
                                     or request.user.is_staff):
             return False

@@ -21,7 +21,7 @@ class LikeSerializer(serializers.ModelSerializer):
 class ArticleSerializer(serializers.ModelSerializer):
     author = UserSerializer(required=False)
     topic = TopicSerializer(required=False)
-    like = LikeSerializer(many=True)
+    like = LikeSerializer(many=True, required=False)
 
     class Meta:
         model = Article

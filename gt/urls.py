@@ -18,6 +18,7 @@ urlpatterns = [
     path("user/register", gt_user.views.RegisterView.as_view()),
     re_path(r'^api-auth/',
             include('rest_framework.urls', namespace='rest_framework')),
-    path("utils/upload", gt_utils.views.UploadView.as_view()),
+    path("utils/upload_image", gt_utils.views.UploadImageView.as_view()),
+    path("utils/get_music_url", gt_utils.views.get_music_url),
     path('admin/', admin.site.urls),
 ]

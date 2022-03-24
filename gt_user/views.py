@@ -6,6 +6,7 @@ from rest_framework.exceptions import ValidationError
 from rest_framework.response import Response
 from rest_framework.views import APIView
 from rest_framework.viewsets import ModelViewSet
+from rest_framework.permissions import IsAuthenticatedOrReadOnly
 
 from gt.permissions import RobotCheck
 
@@ -59,7 +60,7 @@ class RegisterView(APIView):
 class UserViewSet(ModelViewSet):
     queryset = User.objects.all()
     serializer_class = UserSerializer
-    permission_classes = [UserPermission]
+    permission_classes = [IsAuthenticatedOrReadOnly, UserPermission]
 
     def perform_destroy(self, instance):
         instance.save(state=BanStateChoices.NO_LOGIN)

@@ -1,5 +1,6 @@
+from xml.etree.ElementTree import QName
 from gt.permissions import *
-from rest_framework.exceptions import ValidationError
+from gt.authentications import *
 from rest_framework.permissions import IsAuthenticatedOrReadOnly, IsAuthenticated, IsAdminUser
 from rest_framework.decorators import action
 from rest_framework.response import Response
@@ -19,7 +20,7 @@ class TopicViewSet(ModelViewSet):
 
 
 class ArticleViewSet(ModelViewSet):
-    queryset = Article.objects.all()
+    queryset = Article.objects.all().order_by('-id')
     permission_classes = [IsAuthenticatedOrReadOnly, ArticlePermission]
     filter_backends = [DjangoFilterBackend]
     filterset_class = ArticleFilter
@@ -49,67 +50,62 @@ class ArticleViewSet(ModelViewSet):
     def perform_destroy(self, instance):
         instance.save(state=ArticleStateChoices.DELETE)
 
-    @action(detail=True,
-            methods=['post'],
-            permission_classes=[IsAuthenticated],
-            url_path='like')
-    def like(self, request, pk=None):
-        article = self.get_object()
-        if article.like.filter(user=request.user).exists():
-            article.like.filter(user=request.user).first().delete()
-            return Response({
-                'status': 'success',
-                'opt': 'deleted',
-                'detail': '取消成功!'
-            })
-        article.like.get_or_create(user=request.user)
-        return Response({
-            'status': 'success',
-            'opt': 'added',
-            'detail': '点赞成功!'
-        })
-
-    @action(detail=True,
-            methods=['post'],
-            permission_classes=[IsAuthenticated],
-            url_path='add_comment')
-    def add_comment(self, request, pk=None):
-        article = self.get_object()
-        reply = request.data.get('reply') and Comment.objects.filter(
-            id=request.data['reply'])
-        if reply.exists() and reply.first().article == article:
-            comment = article.comment.create(author=request.user,
-                                             content=request.data['content'],
-                                             reply=reply.first())
-        else:
-            comment = article.comment.create(author=request.user,
-                                             content=request.data['content'])
-        return Response({
-            'status':
-            'success',
-            'comment':
-            CommentSerializer().to_representation(comment)
-        })
-
 
 class CommentViewSet(ModelViewSet):
-    queryset = Comment.objects.all()
-    serializer_class = CommentSerializer
-    permission_classes = [NoEdit, IsAuthenticatedOrReadOnly, IsAdminUser]
+    queryset = Comment.objects.all().order_by('-id')
+    permission_classes = [IsAuthenticatedOrReadOnly, NoEdit, CommentPermission]
+    filter_backends = [DjangoFilterBackend]
+    filterset_class = CommentFilter
+
+    def get_serializer_class(self):
+        if self.action == 'list':
+            return CommentSerializer
+        return DetailCommentSerializer
 
     def perform_create(self, serializer):
-        serializer.save(author=self.request.user)
+        author = self.request.user
+        article_id = self.request.data['article']
+        reply = self.request.data.get('reply')
+        reply = reply and Comment.objects.filter(id=reply)
+        reply = reply and reply.exists() and reply.first()
+        reply = reply and reply.article.id == int(article_id) and reply or None
+        serializer.save(author=author, article_id=article_id, reply=reply)
 
     def perform_destroy(self, instance):
         instance.save(state=TopicCommentStateChoices.DELETE)
 
 
-# class LikeViewSet(ModelViewSet):
-#     queryset = Like.objects.all()
-#     serializer_class = LikeSerializer
-#     permission_classes = [NoEdit, IsAuthenticatedOrReadOnly, IsAdminUser]
+class LikeViewSet(ModelViewSet):
+    queryset = Like.objects.all().order_by('-id')
+    permission_classes = [NoEdit, IsAuthenticatedOrReadOnly]
+    filter_backends = [DjangoFilterBackend]
+    filterset_class = LikeFilter
 
-#     def create(self, request, *args, **kwargs):
-#         Like.objects.get_or_create(user=request.user,
-#                                    article_id=request.data['article'])
-#         return
+    def get_serializer_class(self):
+        if self.action == 'list':
+            return LikeSerializer
+        return DetailLikeSerializer
+
+    def create(self, request, *args, **kwargs):
+        if request.data.get('article'):
+            article = Article.objects.filter(id=request.data['article'])
+            if article.exists():
+                article = article.first()
+            else:
+                return Response({
+                    'status': 'error',
+                    'detail': '文章不存在!'
+                })
+            if article.like.filter(user=request.user).exists():
+                article.like.filter(user=request.user).first().delete()
+                return Response({
+                    'status': 'success',
+                    'opt': 'cancel',
+                    'detail': '取消成功!'
+                })
+            article.like.get_or_create(user=request.user)
+            return Response({'status': 'success', 'opt': 'add', 'detail': '点赞成功!'})
+        elif request.data.get('comment'):
+            Like.objects.get_or_create(user=request.user,
+                                       comment_id=request.data['comment'])
+        return

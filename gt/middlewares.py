@@ -1,3 +1,5 @@
+from django.http import HttpResponse
+
 from rest_framework.exceptions import AuthenticationFailed
 
 
@@ -6,10 +8,16 @@ class CorsMiddleware:
         self.get_response = get_response
 
     def __call__(self, request):
-        response = self.get_response(request)
+        if request.method != 'OPTIONS':
+            response = self.get_response(request)
+        else:
+            response = HttpResponse()
         response['Access-Control-Allow-Origin'] = "*"
         response['Access-Control-Allow-Methods'] = "*"
         response['Access-Control-Allow-Headers'] = "*"
+        response['Access-Control-Allow-Credentials'] = "true"
+        response['Access-Control-Max-Age'] = "86400"
+        response['Allow'] = "*"
         return response
 
 

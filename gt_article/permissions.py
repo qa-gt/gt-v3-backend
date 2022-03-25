@@ -2,6 +2,11 @@ from rest_framework.permissions import BasePermission, SAFE_METHODS
 
 
 class ArticlePermission(BasePermission):
+    def has_permission(self, request, view):
+        if request.method in SAFE_METHODS:
+            return True
+        return request.user and request.user.ban_state > -1
+
     def has_object_permission(self, request, view, obj):
         if request.method in SAFE_METHODS:
             return True
@@ -18,13 +23,11 @@ class ArticlePermission(BasePermission):
 
 class CommentPermission(BasePermission):
     def has_permission(self, request, view):
-        if request.method in SAFE_METHODS or request.method == 'DELETE':
+        if request.method in SAFE_METHODS:
             return True
-        else:
-            return request.user.is_staff
+        return request.user and request.user.ban_state > -2
 
     def has_object_permission(self, request, view, obj):
         if request.method in SAFE_METHODS or request.user.is_staff:
             return True
-        elif request.method == 'DELETE':
-            return request.user.id == obj.author.id
+        return request.user.id == obj.author.id

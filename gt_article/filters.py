@@ -2,6 +2,16 @@ from django_filters import rest_framework as filters
 from .models import *
 
 
+class TopicFilter(filters.FilterSet):
+    min_state = filters.NumberFilter(field_name="state", lookup_expr='gte')
+
+    class Meta:
+        model = Topic
+        fields = {
+            'state': ['exact', 'gt', 'gte', 'lt', 'lte'],
+        }
+
+
 class ArticleFilter(filters.FilterSet):
     min_state = filters.NumberFilter(field_name="state", lookup_expr='gte')
 

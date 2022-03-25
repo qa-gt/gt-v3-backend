@@ -21,13 +21,13 @@ class SimpleArticleSerializer(serializers.ModelSerializer):
 
 class ArticleSerializer(serializers.ModelSerializer):
     author = UserSerializer(required=False)
-    topic = TopicSerializer(required=False, default=Topic.objects.get(id=0))
+    topic = TopicSerializer(required=False)
 
     class Meta:
         model = Article
         fields = '__all__'
         read_only_fields = ('id', 'author', 'create_time', 'update_time',
-                            'read_count')
+                            'read_count', 'topic')
 
 
 class SimpleCommentSerializer(serializers.ModelSerializer):

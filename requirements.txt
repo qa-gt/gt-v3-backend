@@ -4,4 +4,4 @@ djangorestframework~=3.13.1
 psycopg2~=2.9.3
 requests~=2.22.0
 django-filter~=21.1
-musicapi
+musicapi~=0.3.3

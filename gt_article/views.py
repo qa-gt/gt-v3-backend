@@ -1,4 +1,3 @@
-from xml.etree.ElementTree import QName
 from gt.permissions import *
 from gt.authentications import *
 from rest_framework.permissions import IsAuthenticatedOrReadOnly
@@ -6,6 +5,7 @@ from rest_framework.decorators import action
 from rest_framework.response import Response
 from rest_framework.viewsets import ModelViewSet
 from django_filters.rest_framework import DjangoFilterBackend
+from rest_framework.filters import SearchFilter
 
 from .models import *
 from .permissions import *
@@ -24,8 +24,9 @@ class TopicViewSet(ModelViewSet):
 class ArticleViewSet(ModelViewSet):
     queryset = Article.objects.all().order_by('-id')
     permission_classes = [IsAuthenticatedOrReadOnly, ArticlePermission]
-    filter_backends = [DjangoFilterBackend]
+    filter_backends = [DjangoFilterBackend, SearchFilter]
     filterset_class = ArticleFilter
+    search_fields = ['title', 'content']
 
     def get_serializer_class(self):
         if self.action == 'list':

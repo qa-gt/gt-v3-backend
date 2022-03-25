@@ -20,6 +20,10 @@ class GtAuthentication(BaseAuthentication):
         jwt = jwt[1]
         user = jdecode(jwt)
         if user:
-            return (User.objects.get(id=user['id']), jwt)
+            user = User.objects.filter(id=user['id'])
+            if user.exists() and user.first().is_active:
+                return (user.first(), jwt)
+            else:
+                return (None, None)
         else:
             return (None, None)

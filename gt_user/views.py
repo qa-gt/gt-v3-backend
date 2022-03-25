@@ -7,6 +7,7 @@ from rest_framework.response import Response
 from rest_framework.views import APIView
 from rest_framework.viewsets import ModelViewSet
 from rest_framework.permissions import IsAuthenticatedOrReadOnly
+from django_filters.rest_framework import DjangoFilterBackend
 
 from gt.permissions import RobotCheck
 
@@ -34,7 +35,7 @@ class LoginView(APIView):
             'status': 'success',
             'detail': '登录成功',
             'token': jencode({'id': user.id}),
-            'user': UserSerializer(user).data
+            'user': DetailUserSerializer(user).data
         })
 
 
@@ -53,14 +54,18 @@ class RegisterView(APIView):
             'status': 'success',
             'detail': '注册成功',
             'token': jencode({'id': user.id}),
-            'user': UserSerializer(user).data
+            'user': DetailUserSerializer(user).data
         })
 
 
 class UserViewSet(ModelViewSet):
     queryset = User.objects.all()
-    serializer_class = UserSerializer
+    serializer_class = DetailUserSerializer
+    filter_backends = [DjangoFilterBackend]
     permission_classes = [IsAuthenticatedOrReadOnly, UserPermission]
+    filterset_fields = [
+        'username', 'is_active', 'ban_state', 'is_staff', 'is_superuser'
+    ]
 
     def perform_destroy(self, instance):
         instance.save(state=BanStateChoices.NO_LOGIN)

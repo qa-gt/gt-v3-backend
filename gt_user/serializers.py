@@ -6,9 +6,17 @@ class SimpleUserSerializer(serializers.ModelSerializer):
     class Meta:
         model = User
         fields = ('id', 'username')
+        read_only_fields = ('id', 'username')
 
 
 class UserSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = User
+        fields = ('id', 'username', 'tags', 'grade', 'gender')
+        read_only_fields = ('id', 'username', 'tags', 'grade', 'gender')
+
+
+class DetailUserSerializer(serializers.ModelSerializer):
     class Meta:
         model = User
         fields = [

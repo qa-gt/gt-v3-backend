@@ -21,7 +21,7 @@ class User(AbstractUser):
                                 null=True,
                                 blank=True,
                                 verbose_name="头像")
-    grade = models.CharField(max_length=10, default="保密", verbose_name="年级")
+    grade = models.CharField(max_length=8, default="保密", verbose_name="年级")
     gender = models.SmallIntegerField(default=GenderChoices.SECRET,
                                       choices=GenderChoices.choices,
                                       verbose_name="性别")

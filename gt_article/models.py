@@ -111,7 +111,7 @@ class Comment(models.Model):
     )
 
     def __str__(self):
-        return f'{self.id}-{self.author} 于 {self.under}'
+        return f'{self.id}-{self.author} 于 {self.article}'
 
     class Meta:
         db_table = 'comment'

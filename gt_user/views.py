@@ -4,9 +4,10 @@ from django.contrib.auth import authenticate
 from gt import jencode
 from rest_framework.exceptions import ValidationError
 from rest_framework.response import Response
+from rest_framework.decorators import action
 from rest_framework.views import APIView
-from rest_framework.viewsets import ModelViewSet
-from rest_framework.permissions import IsAuthenticatedOrReadOnly
+from rest_framework.viewsets import ModelViewSet, GenericViewSet, mixins, ReadOnlyModelViewSet
+from rest_framework.permissions import *
 from django_filters.rest_framework import DjangoFilterBackend
 
 from gt.permissions import RobotCheck
@@ -59,7 +60,7 @@ class RegisterView(APIView):
 
 
 class UserViewSet(ModelViewSet):
-    queryset = User.objects.all()
+    queryset = User.objects.all().order_by('id')
     serializer_class = DetailUserSerializer
     filter_backends = [DjangoFilterBackend]
     permission_classes = [IsAuthenticatedOrReadOnly, UserPermission]
@@ -69,3 +70,36 @@ class UserViewSet(ModelViewSet):
 
     def perform_destroy(self, instance):
         instance.save(state=BanStateChoices.NO_LOGIN)
+
+    @action(methods=['post'],
+            detail=True,
+            permission_classes=[IsAuthenticated],
+            url_path='follow')
+    def follow(self, request, pk=None):
+        user = self.get_object()
+        user.following.get_or_create(follower=request.user)
+        return Response({'status': 'success', 'detail': '关注成功'})
+
+    @action(methods=['post'],
+            detail=True,
+            permission_classes=[IsAuthenticated],
+            url_path='unfollow')
+    def unfollow(self, request, pk=None):
+        user = self.get_object()
+        user.following.filter(follower=request.user).delete()
+        return Response({'status': 'success', 'detail': '取消关注成功'})
+
+
+class FollowView(ReadOnlyModelViewSet):
+    queryset = Follow.objects.all().order_by('id')
+    filter_backends = [DjangoFilterBackend]
+    filterset_fields = ['follower', 'following']
+
+    def get_serializer_class(self):
+        if self.action == 'list':
+            if self.request.GET.get('following'):
+                return FollowerSerializer
+            elif self.request.GET.get('follower'):
+                return FollowingSerializer
+            return FollowSerializer
+        return DetailFollowSerializer

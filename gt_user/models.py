@@ -58,11 +58,11 @@ class Follow(models.Model):
     follower = models.ForeignKey(User,
                                  on_delete=models.CASCADE,
                                  related_name='follower',
-                                 verbose_name='当前用户')
+                                 verbose_name='关注用户')
     following = models.ForeignKey(User,
                                   on_delete=models.CASCADE,
                                   related_name='following',
-                                  verbose_name='关注用户')
+                                  verbose_name='被关注用户')
     follow_time = models.DateTimeField(auto_now_add=True, verbose_name='关注时间')
 
     def __str__(self):

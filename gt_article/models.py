@@ -53,7 +53,7 @@ class Article(models.Model):
     title = models.CharField(max_length=100, verbose_name='标题')
     content = models.TextField(verbose_name='正文')
     create_time = models.DateTimeField(auto_now_add=True, verbose_name='创建时间')
-    update_time = models.DateTimeField(auto_now=True, verbose_name='更新时间')
+    update_time = models.DateTimeField(auto_now_add=True, verbose_name='更新时间')
     state = models.SmallIntegerField(
         null=True,
         blank=True,

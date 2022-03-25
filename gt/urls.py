@@ -12,6 +12,8 @@ router.register(r'article', gt_article.views.ArticleViewSet)
 router.register(r'topic', gt_article.views.TopicViewSet)
 router.register('like', gt_article.views.LikeViewSet)
 router.register(r'comment', gt_article.views.CommentViewSet)
+router.register(r'collect', gt_article.views.CollectView)
+router.register(r'follow', gt_user.views.FollowView)
 
 urlpatterns = [
     re_path(r'^', include(router.urls)),

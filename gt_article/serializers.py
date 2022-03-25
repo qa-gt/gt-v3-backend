@@ -75,3 +75,12 @@ class DetailLikeSerializer(serializers.ModelSerializer):
         model = Like
         fields = ('id', 'user', 'article', 'comment')
         read_only_fields = ('id', 'user')
+
+
+class CollectSerializer(serializers.ModelSerializer):
+    article = SimpleArticleSerializer(required=False)
+
+    class Meta:
+        model = Collect
+        fields = ('article', )
+        read_only_fields = ('id', 'user')

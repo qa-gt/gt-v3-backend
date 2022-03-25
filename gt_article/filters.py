@@ -14,6 +14,7 @@ class TopicFilter(filters.FilterSet):
 
 class ArticleFilter(filters.FilterSet):
     min_state = filters.NumberFilter(field_name="state", lookup_expr='gte')
+
     # q = filters.CharFilter(field_name="title", lookup_expr='icontains')
 
     class Meta:
@@ -42,5 +43,14 @@ class CommentFilter(filters.FilterSet):
         fields = {
             'state': ['exact', 'gt', 'gte', 'lt', 'lte'],
             'author': ['exact'],
+            'article': ['exact'],
+        }
+
+
+class CollectFilter(filters.FilterSet):
+    class Meta:
+        model = Collect
+        fields = {
+            'user': ['exact'],
             'article': ['exact'],
         }

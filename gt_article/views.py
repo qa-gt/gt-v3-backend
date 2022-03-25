@@ -1,11 +1,12 @@
 from gt.permissions import *
 from gt.authentications import *
-from rest_framework.permissions import IsAuthenticatedOrReadOnly
+from rest_framework.permissions import *
 from rest_framework.decorators import action
 from rest_framework.response import Response
-from rest_framework.viewsets import ModelViewSet
+from rest_framework.viewsets import ModelViewSet, mixins, GenericViewSet
 from django_filters.rest_framework import DjangoFilterBackend
 from rest_framework.filters import SearchFilter
+from django.utils import timezone
 
 from .models import *
 from .permissions import *
@@ -45,9 +46,10 @@ class ArticleViewSet(ModelViewSet):
         if self.request.data.get('_topic'):
             topic = Topic.objects.filter(id=self.request.data['_topic'])
             if topic.exists():
-                serializer.save(topic=topic.first())
+                serializer.save(topic=topic.first(),
+                                update_time=timezone.now())
                 return
-        serializer.save(topic_id=0)
+        serializer.save(topic_id=0, update_time=timezone.now())
 
     def perform_destroy(self, instance):
         instance.save(state=ArticleStateChoices.DELETE)
@@ -89,15 +91,6 @@ class CommentViewSet(ModelViewSet):
                                content=content)
         return Response(status=201)
 
-    # def perform_create(self, serializer):
-    #     author = self.request.user
-    #     article_id = self.request.data['article']
-    #     reply = self.request.data.get('reply')
-    #     reply = reply and Comment.objects.filter(id=reply)
-    #     reply = reply and reply.exists() and reply.first()
-    #     reply = reply and reply.article.id == int(article_id) and reply or None
-    #     serializer.save(author=author, article_id=article_id, reply=reply)
-
     def perform_destroy(self, instance):
         instance.save(state=TopicCommentStateChoices.DELETE)
 
@@ -137,3 +130,34 @@ class LikeViewSet(ModelViewSet):
             Like.objects.get_or_create(user=request.user,
                                        comment_id=request.data['comment'])
         return
+
+
+class CollectView(mixins.ListModelMixin, GenericViewSet):
+    queryset = Collect.objects.all().order_by('id')
+    serializer_class = CollectSerializer
+    permission_classes = [IsAuthenticatedOrReadOnly, CollectPermission]
+    filter_backends = [DjangoFilterBackend, SearchFilter]
+    filterset_class = CollectFilter
+    search_fields = ['article__title', 'article__content']
+
+    def create(self, request, *args, **kwargs):
+        article = Article.objects.filter(id=request.data['article'])
+        if article.exists():
+            article = article.first()
+        else:
+            return Response({'status': 'error', 'detail': '文章不存在!'})
+        Collect.objects.get_or_create(user=request.user, article=article)
+        return Response({'status': 'success', 'detail': '收藏成功!'})
+
+    def destroy(self, request, *args, **kwargs):
+        article = Article.objects.filter(id=request.data['article'])
+        if article.exists():
+            article = article.first()
+        else:
+            return Response({'status': 'error', 'detail': '文章不存在!'})
+        collect = Collect.objects.filter(user=request.user, article=article)
+        if collect.exists():
+            collect.first().delete()
+            return Response({'status': 'success', 'detail': '取消成功!'})
+        else:
+            return Response({'status': 'error', 'detail': '收藏不存在!'})

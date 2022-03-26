@@ -24,7 +24,8 @@ class TopicViewSet(ModelViewSet):
 
 
 class ArticleViewSet(ModelViewSet):
-    queryset = Article.objects.all().order_by('-id')
+    queryset = Article.objects.filter(
+        state__gt=ArticleStateChoices.HIDE).order_by('-id')
     permission_classes = [IsAuthenticatedOrReadOnly, ArticlePermission]
     filter_backends = [DjangoFilterBackend, SearchFilter]
     filterset_class = ArticleFilter
@@ -53,7 +54,8 @@ class ArticleViewSet(ModelViewSet):
         serializer.save(topic_id=0, update_time=timezone.now())
 
     def perform_destroy(self, instance):
-        instance.save(state=ArticleStateChoices.DELETE)
+        instance.state = ArticleStateChoices.DELETE
+        instance.save()
 
     @action(methods=['patch'],
             detail=True,

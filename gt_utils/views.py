@@ -17,10 +17,11 @@ class UploadImageView(APIView):
         if file.size > 1024 * 1024 * 5:
             return Response({"status": "error", "detail": "图片大小不能超过5M"})
         name = f"{time.time()}_{request.ip}.{file.name.split('.')[-1]}"
-        if settings.GT_SERVER == "PRODUCTION":
-            path = f"{settings.STATIC_ROOT}/article_images/{name}"
-        else:
-            path = f"{settings.STATICFILES_DIRS[0]}/article_images/{name}"
+        # if settings.GT_SERVER == "PRODUCTION":
+        #     path = f"{settings.STATIC_ROOT}/article_images/{name}"
+        # else:
+        #     path = f"{settings.STATICFILES_DIRS[0]}/article_images/{name}"
+        path = f"{settings.STATICFILES_DIRS[0]}/article_images/{name}"
         with open(path, 'wb+') as f:
             for chunk in file.chunks():
                 f.write(chunk)

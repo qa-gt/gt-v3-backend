@@ -164,7 +164,7 @@ REST_FRAMEWORK = {
     'DEFAULT_PAGINATION_CLASS':
     'rest_framework.pagination.PageNumberPagination',
     'PAGE_SIZE':
-    20
+    20,
 }
 
 AUTH_USER_MODEL = 'gt_user.User'
@@ -200,5 +200,4 @@ JWT_PREFIX = 'JWT'
 
 JWT_EXPIRE_TIME = datetime.timedelta(days=1)
 
-VAPTCHA_VID = "623adf7fe82e6539de8faf81"
-VAPTCHA_KEY = "6352d2255a3b4a60814774fe4ef8a79c"
+RECAPTCHA_SECRET = "6LdU6xAfAAAAAEnvD6qVraMBJAjb8gX8rzdw_qAv"

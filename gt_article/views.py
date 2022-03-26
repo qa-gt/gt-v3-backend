@@ -20,6 +20,7 @@ class TopicViewSet(ModelViewSet):
     queryset = Topic.objects.all().order_by('id')
     serializer_class = TopicSerializer
     permission_classes = [IsAdminOrReadOnly]
+    pagination_class = None
 
 
 class ArticleViewSet(ModelViewSet):
@@ -71,6 +72,7 @@ class CommentViewSet(ModelViewSet):
     permission_classes = [IsAuthenticatedOrReadOnly, NoEdit, CommentPermission]
     filter_backends = [DjangoFilterBackend]
     filterset_class = CommentFilter
+    pagination_class = None
 
     def get_serializer_class(self):
         if self.action == 'list':
@@ -100,6 +102,7 @@ class LikeViewSet(ModelViewSet):
     permission_classes = [NoEdit, IsAuthenticatedOrReadOnly]
     filter_backends = [DjangoFilterBackend]
     filterset_class = LikeFilter
+    pagination_class = None
 
     def get_serializer_class(self):
         if self.action == 'list':

@@ -1,3 +1,4 @@
+from re import search
 from django.utils import timezone
 
 from django.contrib.auth import authenticate
@@ -9,6 +10,7 @@ from rest_framework.views import APIView
 from rest_framework.viewsets import ModelViewSet, GenericViewSet, mixins, ReadOnlyModelViewSet
 from rest_framework.permissions import *
 from django_filters.rest_framework import DjangoFilterBackend
+from rest_framework.filters import SearchFilter
 
 from gt.permissions import RobotCheck
 
@@ -77,7 +79,9 @@ class UserViewSet(ModelViewSet):
             url_path='follow')
     def follow(self, request, pk=None):
         user = self.get_object()
-        user.following.get_or_create(follower=request.user)
+        follow = user.following.filter(follower=request.user)
+        if not follow.exists():
+            Follow.objects.create(follower=request.user, following=user)
         return Response({'status': 'success', 'detail': '关注成功'})
 
     @action(methods=['post'],
@@ -92,8 +96,12 @@ class UserViewSet(ModelViewSet):
 
 class FollowView(ReadOnlyModelViewSet):
     queryset = Follow.objects.all().order_by('id')
-    filter_backends = [DjangoFilterBackend]
+    filter_backends = [DjangoFilterBackend, SearchFilter]
     filterset_fields = ['follower', 'following']
+    search_fields = [
+        'follower__username', 'following__username', 'follower__id',
+        'following__id'
+    ]
 
     def get_serializer_class(self):
         if self.action == 'list':

@@ -23,24 +23,24 @@ class RobotCheck(BasePermission):
     def has_permission(self, request, view):
         if request.method in SAFE_METHODS:
             return True
-        v_server = request.data.get('server')
-        v_token = request.data.get('token')
-        v_scene = request.data.get('scene') and int(request.data['scene']) or 0
-        if v_server and v_token:
+        token = request.data.get('recaptcha')
+        if token:
             r = post(
-                v_server, {
-                    'token': v_token,
+                "https://www.recaptcha.net/recaptcha/api/siteverify", {
+                    'response': token,
                     'ip': request.ip,
-                    'id': settings.VAPTCHA_VID,
-                    'secretkey': settings.VAPTCHA_KEY,
-                    'scene': v_scene
+                    'secret': settings.RECAPTCHA_SECRET,
                 }).json()
             print(r)
             if not r['success']:
                 raise AuthenticationFailed({
                     'status': 'error',
-                    'action': 'rerobot',
                     'detail': '人机验证出错, 请重试'
+                })
+            elif r['score'] < 0.6:
+                raise AuthenticationFailed({
+                    'status': 'error',
+                    'detail': '您未能通过人机验证!'
                 })
             else:
                 return True

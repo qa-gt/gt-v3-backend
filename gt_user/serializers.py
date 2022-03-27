@@ -10,24 +10,32 @@ class SimpleUserSerializer(serializers.ModelSerializer):
 
 
 class UserSerializer(serializers.ModelSerializer):
+    yunxiao_auth = serializers.CharField(source='yunxiao.show',
+                                         read_only=True,
+                                         allow_null=True)
+
     class Meta:
         model = User
-        fields = ('id', 'username', 'tags', 'grade', 'gender', 'portrait')
+        fields = ('id', 'username', 'tags', 'grade', 'gender', 'portrait',
+                  'yunxiao_auth')
         read_only_fields = ('id', 'username', 'tags', 'grade', 'gender',
-                            'portrait')
+                            'portrait', 'yunxiao_auth')
 
 
 class DetailUserSerializer(serializers.ModelSerializer):
+    yunxiao = serializers.SlugRelatedField(slug_field='show',
+                                           read_only=True,
+                                           allow_null=True,
+                                           many=True)
+
     class Meta:
         model = User
         fields = [
             'id', 'username', 'grade', 'gender', 'introduction', 'tags',
-            'portrait', 'email', 'ban_state', 'is_staff', 'is_superuser'
+            'portrait', 'email', 'ban_state', 'is_staff', 'is_superuser',
+            'yunxiao'
         ]
-        read_only_fields = (
-            'id',
-            'username',
-        )
+        read_only_fields = ('id', 'username', 'yunxiao')
 
 
 class FollowSerializer(serializers.ModelSerializer):
@@ -54,7 +62,7 @@ class FollowingSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = Follow
-        fields = ('following',)
+        fields = ('following', )
         read_only_fields = ('following', )
 
 

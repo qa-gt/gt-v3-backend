@@ -1,4 +1,3 @@
-from re import search
 from django.utils import timezone
 
 from django.contrib.auth import authenticate
@@ -7,7 +6,7 @@ from rest_framework.exceptions import ValidationError
 from rest_framework.response import Response
 from rest_framework.decorators import action
 from rest_framework.views import APIView
-from rest_framework.viewsets import ModelViewSet, GenericViewSet, mixins, ReadOnlyModelViewSet
+from rest_framework.viewsets import ModelViewSet, ReadOnlyModelViewSet
 from rest_framework.permissions import *
 from django_filters.rest_framework import DjangoFilterBackend
 from rest_framework.filters import SearchFilter
@@ -17,6 +16,7 @@ from gt.permissions import RobotCheck
 from .models import *
 from .permissions import *
 from .serializers import *
+from .yunxiao import yx_login
 
 
 class LoginView(APIView):
@@ -92,6 +92,42 @@ class UserViewSet(ModelViewSet):
         user = self.get_object()
         user.following.filter(follower=request.user).delete()
         return Response({'status': 'success', 'detail': '取消关注成功'})
+
+    @action(methods=['post'], detail=False, url_path='yunxiao_auth')
+    def yunxiao_auth(self, request, pk=None):
+        show = request.data.get('show') == 'true' or None
+        if request.user.yunxiao_state:
+            yunxiao = Yunxiao.objects.get(user=request.user)
+            if show:
+                yunxiao.show = f"{yunxiao.real_name}({yunxiao.student_id[:4]}****)"
+            else:
+                yunxiao.show = None
+            yunxiao.save()
+            return Response({'status': 'error', 'detail': '实名信息展示状态更新成功'})
+        student_id = request.data.get('student_id')
+        password = request.data.get('password')
+        if not student_id or not password:
+            return Response({'status': 'error', 'detail': '用户名或密码不能为空'})
+        r = yx_login(student_id, password)
+        if r['status'] != 'success':
+            return Response({'status': 'error', 'detail': r['msg']})
+        r = r['data']
+        if show:
+            show = f"{r['real_name']}({r['user_id'][:4]}****)"
+        yunxiao = Yunxiao(
+            user=request.user,
+            student_id=student_id,
+            uid=r['user_id'],
+            real_name=r['real_name'],
+            mobile=r['mobile'],
+            show=show,
+            role=r['role'],
+            gender=r['gender'],
+        )
+        yunxiao.save()
+        request.user.yunxiao_state = True
+        request.user.save()
+        return Response({'status': 'success', 'detail': '认证成功'})
 
 
 class FollowView(ReadOnlyModelViewSet):

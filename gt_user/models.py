@@ -15,6 +15,12 @@ class BanStateChoices(models.IntegerChoices):
     NO_LOGIN = -3, "禁止登录"
 
 
+class YxRoleChoices(models.IntegerChoices):
+    UNKNOWN = 0, '位置'
+    STUDENT = 1, '学生'
+    TEACHER = 2, '老师'
+
+
 class User(AbstractUser):
     portrait = models.CharField(max_length=50,
                                 default="",
@@ -38,6 +44,7 @@ class User(AbstractUser):
                             blank=True,
                             default="",
                             verbose_name="认证信息")
+    yunxiao_state = models.BooleanField(default=False, verbose_name='云校认证')
 
     def __str__(self):
         return f"[{self.id}] {self.username}"
@@ -71,3 +78,47 @@ class Follow(models.Model):
     class Meta:
         db_table = "follow"
         verbose_name = verbose_name_plural = "关注"
+
+
+class Yunxiao(models.Model):
+    user = models.ForeignKey(User,
+                             on_delete=models.CASCADE,
+                             related_name='yunxiao',
+                             verbose_name='用户')
+    student_id = models.CharField(
+        max_length=20,
+        unique=True,
+    )
+    uid = models.CharField(
+        max_length=50,
+        unique=True,
+    )
+    real_name = models.CharField(max_length=10, verbose_name='真实姓名')
+    show = models.CharField(
+        max_length=10,
+        verbose_name='显示姓名',
+        null=True,
+        blank=True,
+    )
+    gender = models.SmallIntegerField(
+        default=GenderChoices.SECRET,
+        choices=GenderChoices.choices,
+        verbose_name="性别",
+    )
+    mobile = models.CharField(
+        max_length=11,
+        verbose_name='手机号',
+        null=True,
+        blank=True,
+    )
+    role = models.SmallIntegerField(default=YxRoleChoices.UNKNOWN,
+                                    choices=YxRoleChoices.choices,
+                                    verbose_name="角色")
+    time = models.DateTimeField(auto_now_add=True, verbose_name='认证时间')
+
+    def __str__(self):
+        return f"{self.user}云校认证"
+
+    class Meta:
+        db_table = "yunxiao"
+        verbose_name = verbose_name_plural = "云校认证"

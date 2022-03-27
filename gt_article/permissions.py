@@ -33,5 +33,4 @@ class CommentPermission(BasePermission):
 
 class CollectPermission(BasePermission):
     def has_object_permission(self, request, view, obj):
-        print(123)
         return request.method in SAFE_METHODS or request.user.id == obj.user.id

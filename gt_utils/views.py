@@ -1,15 +1,16 @@
 import time
 import musicapi
 from django.http import HttpResponseRedirect
-from django.views.decorators.http import require_GET
 from rest_framework.response import Response
 from rest_framework.views import APIView
-from rest_framework.permissions import IsAuthenticatedOrReadOnly
+from rest_framework.permissions import IsAuthenticated
 from django.conf import settings
+
+from .dogecloud import dogecloud_api
 
 
 class UploadImageView(APIView):
-    permission_classes = [IsAuthenticatedOrReadOnly]
+    permission_classes = [IsAuthenticated]
 
     @staticmethod
     def post(request):
@@ -29,6 +30,24 @@ class UploadImageView(APIView):
             "detail": "上传成功",
             "url": f"/static/article_images/{name}"
         })
+
+
+class UploadKeyView(APIView):
+    permission_classes = [IsAuthenticated]
+
+    @staticmethod
+    def get(request):
+        scope = f"atc_images/{request.ip}/{request.user.id}/*"
+        r = dogecloud_api("/auth/tmp_token.json", {
+            "channel": "OSS_UPLOAD",
+            "scopes": [scope],
+            "ttl": 1800,
+        })
+        if r["code"] != 200:
+            return Response({"status": "error", "detail": r["msg"]})
+        r = r["data"]
+        r["scope"] = scope
+        return Response({"status": "success", "detail": "获取成功", "data": r})
 
 
 def get_music_url(request):

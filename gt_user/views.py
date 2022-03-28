@@ -93,7 +93,10 @@ class UserViewSet(ModelViewSet):
         user.following.filter(follower=request.user).delete()
         return Response({'status': 'success', 'detail': '取消关注成功'})
 
-    @action(methods=['post'], detail=False, url_path='yunxiao_auth')
+    @action(methods=['post'],
+            detail=False,
+            permission_classes=[IsAuthenticated],
+            url_path='yunxiao_auth')
     def yunxiao_auth(self, request, pk=None):
         show = request.data.get('show') == 'true' or None
         if request.user.yunxiao_state:
@@ -103,7 +106,11 @@ class UserViewSet(ModelViewSet):
             else:
                 yunxiao.show = None
             yunxiao.save()
-            return Response({'status': 'error', 'detail': '实名信息展示状态更新成功'})
+            return Response({
+                'status': 'success',
+                'detail': '实名信息展示状态更新成功',
+                'user': DetailUserSerializer(request.user).data
+            })
         student_id = request.data.get('student_id')
         password = request.data.get('password')
         if not student_id or not password:
@@ -112,8 +119,10 @@ class UserViewSet(ModelViewSet):
         if r['status'] != 'success':
             return Response({'status': 'error', 'detail': r['msg']})
         r = r['data']
+        if Yunxiao.objects.filter(student_id=student_id).exists():
+            return Response({'status': 'error', 'detail': '该学号已被绑定'})
         if show:
-            show = f"{r['real_name']}({r['user_id'][:4]}****)"
+            show = f"{r['real_name']}({student_id[:4]}****)"
         yunxiao = Yunxiao(
             user=request.user,
             student_id=student_id,
@@ -127,7 +136,11 @@ class UserViewSet(ModelViewSet):
         yunxiao.save()
         request.user.yunxiao_state = True
         request.user.save()
-        return Response({'status': 'success', 'detail': '认证成功'})
+        return Response({
+            'status': 'success',
+            'detail': '认证成功',
+            'user': DetailUserSerializer(request.user).data
+        })
 
 
 class FollowView(ReadOnlyModelViewSet):

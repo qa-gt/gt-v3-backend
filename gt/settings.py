@@ -201,3 +201,7 @@ JWT_PREFIX = 'JWT'
 JWT_EXPIRE_TIME = datetime.timedelta(days=1)
 
 RECAPTCHA_SECRET = "6LdU6xAfAAAAAEnvD6qVraMBJAjb8gX8rzdw_qAv"
+
+DOGE_ACCESS = "1a1fb85b50151663"
+
+DOGE_SECRET = "bddd22a41d3a4005de57ffec66ef427c"

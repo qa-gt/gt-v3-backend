@@ -13,18 +13,21 @@ def jencode(payload):
     return f'{settings.JWT_PREFIX} {jwt_data}'
 
 
-def jdecode(token):
+def jdecode(token, raise_error=True):
     try:
         return jwt.decode(jwt=token,
                           key=settings.SECRET_KEY,
                           leeway=settings.JWT_EXPIRE_TIME,
                           algorithms=['HS256'])
     except jwt.ExpiredSignatureError:
-        raise AuthenticationFailed({
-            'status': 'error',
-            'action': 'relogin',
-            'detail': '登录信息已过期, 请重新登录'
-        })
+        if raise_error:
+            raise AuthenticationFailed({
+                'status': 'error',
+                'action': 'relogin',
+                'detail': '登录信息已过期, 请重新登录'
+            })
+        else:
+            return None
     # except Exception as e:
     # print(e)
     # return None

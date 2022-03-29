@@ -1,4 +1,4 @@
-from django.http import JsonResponse
+from django.http import JsonResponse, HttpResponse
 from rest_framework.exceptions import AuthenticationFailed
 from rest_framework.permissions import SAFE_METHODS
 
@@ -17,7 +17,7 @@ class CorsMiddleware:
         if request.method != 'OPTIONS':
             response = self.get_response(request)
         else:
-            response = HttpResponse(status=403)
+            response = HttpResponse()
         response['Access-Control-Allow-Origin'] = "*"
         response['Access-Control-Allow-Methods'] = "*"
         response['Access-Control-Allow-Headers'] = "*"

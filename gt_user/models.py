@@ -95,7 +95,7 @@ class Yunxiao(models.Model):
     )
     real_name = models.CharField(max_length=10, verbose_name='真实姓名')
     show = models.CharField(
-        max_length=10,
+        max_length=30,
         verbose_name='显示姓名',
         null=True,
         blank=True,

@@ -23,5 +23,6 @@ urlpatterns = [
             include('rest_framework.urls', namespace='rest_framework')),
     path("utils/upload_image", gt_utils.views.UploadImageView.as_view()),
     path("utils/get_music_url", gt_utils.views.get_music_url),
+    path("utils/upload_key", gt_utils.views.UploadKeyView.as_view()),
     path('admin/', admin.site.urls),
 ]

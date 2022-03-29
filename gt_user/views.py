@@ -2,7 +2,7 @@ from django.utils import timezone
 
 from django.contrib.auth import authenticate
 from gt import jencode
-from rest_framework.exceptions import ValidationError
+from rest_framework.exceptions import AuthenticationFailed
 from rest_framework.response import Response
 from rest_framework.decorators import action
 from rest_framework.views import APIView
@@ -29,9 +29,15 @@ class LoginView(APIView):
         password = request.data.get('password')
         user = authenticate(username=username, password=password)
         if not user:
-            raise ValidationError({'detail': '用户名或密码错误'})
+            raise AuthenticationFailed({
+                'status': 'forbidden',
+                'detail': '用户名或密码错误'
+            })
         if not user.is_active:
-            raise ValidationError({'detail': '用户被封禁'})
+            raise AuthenticationFailed({
+                'status': 'forbidden',
+                'detail': '用户被封禁'
+            })
         user.last_login = timezone.now()
         user.save()
         return Response({

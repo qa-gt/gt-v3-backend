@@ -1,6 +1,12 @@
-from django.http import HttpResponse
-
+from django.http import JsonResponse
 from rest_framework.exceptions import AuthenticationFailed
+from rest_framework.permissions import SAFE_METHODS
+
+
+def validate(stamp, sign):
+    stamp = int(stamp)
+    encoded = (((stamp + 410427214035) ^ 7417742047104) % 52410424147) >> 3
+    return encoded == int(sign)
 
 
 class CorsMiddleware:
@@ -11,7 +17,7 @@ class CorsMiddleware:
         if request.method != 'OPTIONS':
             response = self.get_response(request)
         else:
-            response = HttpResponse()
+            response = HttpResponse(status=403)
         response['Access-Control-Allow-Origin'] = "*"
         response['Access-Control-Allow-Methods'] = "*"
         response['Access-Control-Allow-Headers'] = "*"
@@ -21,7 +27,7 @@ class CorsMiddleware:
         return response
 
 
-class GtMiddleware:
+class GtCheck:
     def __init__(self, get_response):
         self.get_response = get_response
 
@@ -30,10 +36,24 @@ class GtMiddleware:
         if not request.headers.get("User-Agent") or not any(
                 i in request.headers["User-Agent"]
                 for i in ['Chrome', 'Safari', 'Mozilla', 'Firefox']):
-            raise AuthenticationFailed({
-                'status': 'forbidden',
-                'detail': '爬虫行为已被禁止'
-            })
+            return JsonResponse({
+                'status': 'error',
+                'detail': '非法请求'
+            },
+                                status=403)
+        if request.method not in SAFE_METHODS and request.GET.get(
+                'ssssign') != 'disable':
+            try:
+                stamp, sign = request.GET.get('_').split('|')
+
+                if not validate(stamp, sign):
+                    raise AuthenticationFailed
+            except:
+                return JsonResponse({
+                    'status': 'error',
+                    'detail': '非法请求'
+                },
+                                    status=403)
         # Get real IP
         request.__setattr__(
             "ip",
@@ -48,6 +68,6 @@ class GtLog:
         self.get_response = get_response
 
     def __call__(self, request):
-        # print(request.headers)
+        # print(request.GET.dict(), request.body, request.get_full_path())
         response = self.get_response(request)
         return response

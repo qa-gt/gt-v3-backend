@@ -40,7 +40,7 @@ class UploadKeyView(APIView):
         scope = f"atc_images/{request.ip}/{request.user.id}/*"
         r = dogecloud_api("/auth/tmp_token.json", {
             "channel": "OSS_UPLOAD",
-            "scopes": [scope],
+            "scopes": [f"gt-image:{scope}"],
             "ttl": 1800,
         })
         if r["code"] != 200:

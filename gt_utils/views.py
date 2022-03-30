@@ -36,13 +36,14 @@ class UploadKeyView(APIView):
     permission_classes = [IsAuthenticated]
 
     @staticmethod
-    def get(request):
+    def post(request):
         scope = f"atc_images/{request.ip}/{request.user.id}/*"
-        r = dogecloud_api("/auth/tmp_token.json", {
-            "channel": "OSS_UPLOAD",
-            "scopes": [f"gt-image:{scope}"],
-            "ttl": 1800,
-        })
+        r = dogecloud_api(
+            "/auth/tmp_token.json", {
+                "channel": "OSS_UPLOAD",
+                "scopes": [f"gt-image:{scope}"],
+                "ttl": 1800,
+            })
         if r["code"] != 200:
             return Response({"status": "error", "detail": r["msg"]})
         r = r["data"]

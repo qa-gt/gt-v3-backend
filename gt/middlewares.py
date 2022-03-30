@@ -1,12 +1,13 @@
+from time import time
+
 from django.http import JsonResponse, HttpResponse
 from rest_framework.exceptions import AuthenticationFailed
 from rest_framework.permissions import SAFE_METHODS
 
 
 def validate(stamp, sign):
-    stamp = int(stamp)
     encoded = (((stamp + 410427214035) ^ 7417742047104) % 52410424147) >> 3
-    return encoded == int(sign)
+    return encoded == sign
 
 
 class CorsMiddleware:
@@ -45,15 +46,17 @@ class GtCheck:
                 'ssssign') != 'disable':
             try:
                 stamp, sign = request.GET.get('_').split('|')
-
-                if not validate(stamp, sign):
+                stamp, sign = int(stamp), int(sign)
+                if not -5 < time() - stamp / 1000 < 5 or not validate(
+                        stamp, sign):
                     raise AuthenticationFailed
             except:
-                return JsonResponse({
-                    'status': 'error',
-                    'detail': '非法请求'
-                },
-                                    status=403)
+                return JsonResponse(
+                    {
+                        'status': 'error',
+                        'detail': '非法请求, 请校对设备时间或稍后再试'
+                    },
+                    status=403)
         # Get real IP
         request.__setattr__(
             "ip",

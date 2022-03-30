@@ -110,7 +110,7 @@ class UserViewSet(ModelViewSet):
             if show:
                 yunxiao.show = f"{yunxiao.real_name}({yunxiao.student_id[:4]}****)"
             else:
-                yunxiao.show = None
+                yunxiao.show = ""
             yunxiao.save()
             return Response({
                 'status': 'success',

@@ -105,6 +105,7 @@ class UserViewSet(ModelViewSet):
             url_path='yunxiao_auth')
     def yunxiao_auth(self, request, pk=None):
         show = request.data.get('show') == 'true' or None
+        print(request.user, request.user.yunxiao_state)
         if request.user.yunxiao_state:
             yunxiao = Yunxiao.objects.get(user=request.user)
             if show:

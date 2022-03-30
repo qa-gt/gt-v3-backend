@@ -10,16 +10,17 @@ class SimpleUserSerializer(serializers.ModelSerializer):
 
 
 class UserSerializer(serializers.ModelSerializer):
-    yunxiao_auth = serializers.CharField(source='yunxiao.show',
-                                         read_only=True,
-                                         allow_null=True)
+    yunxiao = serializers.SlugRelatedField(slug_field='show',
+                                           read_only=True,
+                                           allow_null=True,
+                                           many=True)
 
     class Meta:
         model = User
         fields = ('id', 'username', 'tags', 'grade', 'gender', 'portrait',
-                  'yunxiao_auth')
+                  'yunxiao', 'introduction')
         read_only_fields = ('id', 'username', 'tags', 'grade', 'gender',
-                            'portrait', 'yunxiao_auth')
+                            'portrait', 'yunxiao', 'introduction')
 
 
 class DetailUserSerializer(serializers.ModelSerializer):
@@ -32,8 +33,7 @@ class DetailUserSerializer(serializers.ModelSerializer):
         model = User
         fields = [
             'id', 'username', 'grade', 'gender', 'introduction', 'tags',
-            'portrait', 'email', 'ban_state', 'is_staff', 'is_superuser',
-            'yunxiao'
+            'portrait', 'ban_state', 'is_staff', 'is_superuser', 'yunxiao'
         ]
         read_only_fields = ('id', 'username', 'yunxiao')
 

@@ -31,8 +31,13 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 # SECURITY WARNING: keep the secret key used in production secret!
 SECRET_KEY = 'django-insecure-kg%gl=qy7_^)@ikljm-jvl9r$&3d%^2i$uewj8#t^sq%&7(mxf'
 
-# SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = True
+RECAPTCHA_SECRET = "6LdU6xAfAAAAAEnvD6qVraMBJAjb8gX8rzdw_qAv"
+
+DOGE_ACCESS = "1a1fb85b50151663"
+DOGE_SECRET = "bddd22a41d3a4005de57ffec66ef427c"
+
+WEBGUARD_KEY = b"Y!^JgOQA~DbuTLX8"
+WEBGUARD_IV = b"xv4!DA?plX*dnn3f"
 
 ALLOWED_HOSTS = ["*"]
 
@@ -57,7 +62,7 @@ INSTALLED_APPS = [
 MIDDLEWARE = [
     'gt.middlewares.GtCheck',
     # 'gt.middlewares.GtLog',
-    'gt.middlewares.CorsMiddleware',
+    # 'gt.middlewares.CorsMiddleware',
     'django.middleware.security.SecurityMiddleware',
     'django.contrib.sessions.middleware.SessionMiddleware',
     'django.middleware.common.CommonMiddleware',
@@ -160,10 +165,8 @@ REST_FRAMEWORK = {
     'DEFAULT_PERMISSION_CLASSES': [
         'rest_framework.permissions.IsAuthenticatedOrReadOnly',
     ],
-    'DEFAULT_PAGINATION_CLASS':
-    'rest_framework.pagination.PageNumberPagination',
-    'PAGE_SIZE':
-    20,
+    'DEFAULT_PAGINATION_CLASS': 'rest_framework.pagination.PageNumberPagination',
+    'PAGE_SIZE': 20,
 }
 
 AUTH_USER_MODEL = 'gt_user.User'
@@ -198,9 +201,3 @@ DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 JWT_PREFIX = 'JWT'
 
 JWT_EXPIRE_TIME = datetime.timedelta(days=1)
-
-RECAPTCHA_SECRET = "6LdU6xAfAAAAAEnvD6qVraMBJAjb8gX8rzdw_qAv"
-
-DOGE_ACCESS = "1a1fb85b50151663"
-
-DOGE_SECRET = "bddd22a41d3a4005de57ffec66ef427c"

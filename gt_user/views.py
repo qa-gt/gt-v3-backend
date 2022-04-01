@@ -85,7 +85,7 @@ class UserViewSet(ModelViewSet):
             url_path='follow')
     def follow(self, request, pk=None):
         user = self.get_object()
-        follow = user.following.filter(follower=request.user)
+        follow = user.follower.filter(follower=request.user)
         if not follow.exists():
             Follow.objects.create(follower=request.user, following=user)
         return Response({'status': 'success', 'detail': '关注成功'})
@@ -96,7 +96,7 @@ class UserViewSet(ModelViewSet):
             url_path='unfollow')
     def unfollow(self, request, pk=None):
         user = self.get_object()
-        user.following.filter(follower=request.user).delete()
+        user.follower.filter(follower=request.user).delete()
         return Response({'status': 'success', 'detail': '取消关注成功'})
 
     @action(methods=['post'],
@@ -105,7 +105,6 @@ class UserViewSet(ModelViewSet):
             url_path='yunxiao_auth')
     def yunxiao_auth(self, request, pk=None):
         show = request.data.get('show') == 'true' or None
-        print(request.user, request.user.yunxiao_state)
         if request.user.yunxiao_state:
             yunxiao = Yunxiao.objects.get(user=request.user)
             if show:

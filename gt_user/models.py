@@ -64,11 +64,11 @@ class Group(BaseGroup):
 class Follow(models.Model):
     follower = models.ForeignKey(User,
                                  on_delete=models.CASCADE,
-                                 related_name='follower',
+                                 related_name='following',
                                  verbose_name='关注用户')
     following = models.ForeignKey(User,
                                   on_delete=models.CASCADE,
-                                  related_name='following',
+                                  related_name='follower',
                                   verbose_name='被关注用户')
     follow_time = models.DateTimeField(auto_now_add=True, verbose_name='关注时间')
 

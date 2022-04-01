@@ -2,6 +2,16 @@ from rest_framework import serializers
 from .models import *
 
 
+class Followed(serializers.ReadOnlyField):
+    def to_internal_value(self, data):
+        pass
+
+    def to_representation(self, value):
+        request = self.context.get('request')
+        print(value.all(), request.user)
+        return value.filter(follower=request.user).exists()
+
+
 class SimpleUserSerializer(serializers.ModelSerializer):
     class Meta:
         model = User
@@ -14,11 +24,12 @@ class UserSerializer(serializers.ModelSerializer):
                                            read_only=True,
                                            allow_null=True,
                                            many=True)
+    followed = Followed(source="follower")
 
     class Meta:
         model = User
         fields = ('id', 'username', 'tags', 'grade', 'gender', 'portrait',
-                  'yunxiao', 'introduction')
+                  'yunxiao', 'introduction', 'followed')
         read_only_fields = ('id', 'username', 'tags', 'grade', 'gender',
                             'portrait', 'yunxiao', 'introduction')
 
@@ -28,12 +39,14 @@ class DetailUserSerializer(serializers.ModelSerializer):
                                            read_only=True,
                                            allow_null=True,
                                            many=True)
+    followed = Followed(source="follower")
 
     class Meta:
         model = User
         fields = [
             'id', 'username', 'grade', 'gender', 'introduction', 'tags',
-            'portrait', 'ban_state', 'is_staff', 'is_superuser', 'yunxiao'
+            'portrait', 'ban_state', 'is_staff', 'is_superuser', 'yunxiao',
+            'followed'
         ]
         read_only_fields = ('id', 'username', 'yunxiao')
 

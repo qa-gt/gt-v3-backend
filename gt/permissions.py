@@ -40,7 +40,7 @@ class RobotCheck(BasePermission):
             elif r['score'] < 0.6:
                 raise AuthenticationFailed({
                     'status': 'error',
-                    'detail': '您未能通过人机验证!'
+                    'detail': '您未能通过人机验证！'
                 })
             else:
                 return True

@@ -10,6 +10,7 @@ class Followed(serializers.ReadOnlyField):
         request = self.context.get('request')
         return value.filter(follower=request.user).exists()
 
+
 class YunxiaoField(serializers.ReadOnlyField):
     def to_internal_value(self, data):
         pass
@@ -41,13 +42,13 @@ class UserSerializer(serializers.ModelSerializer):
 
 class DetailUserSerializer(serializers.ModelSerializer):
     yunxiao = YunxiaoField()
-    # followed = Followed(source="follower")
 
     class Meta:
         model = User
         fields = [
             'id', 'username', 'grade', 'gender', 'introduction', 'tags',
-            'portrait', 'ban_state', 'is_staff', 'is_superuser', 'yunxiao'
+            'portrait', 'ban_state', 'is_staff', 'is_superuser', 'yunxiao',
+            'email'
         ]
         read_only_fields = ('id', 'username', 'yunxiao')
 

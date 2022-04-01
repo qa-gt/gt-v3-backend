@@ -5,6 +5,15 @@ from .models import *
 from gt_user.serializers import *
 
 
+class Collected(serializers.ReadOnlyField):
+    def to_internal_value(self, data):
+        pass
+
+    def to_representation(self, value):
+        request = self.context.get('request')
+        return value.filter(user=request.user).exists()
+
+
 class TopicSerializer(serializers.ModelSerializer):
     class Meta:
         model = Topic
@@ -22,6 +31,7 @@ class SimpleArticleSerializer(serializers.ModelSerializer):
 class ArticleSerializer(serializers.ModelSerializer):
     author = UserSerializer(required=False)
     topic = TopicSerializer(required=False)
+    collected = Collected(source="collect")
 
     class Meta:
         model = Article

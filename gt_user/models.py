@@ -12,7 +12,6 @@ class BanStateChoices(models.IntegerChoices):
     NORMAL = 0, '正常'
     NO_POST = -1, "禁止发贴"
     NO_COMMENT = -2, "禁止发言"
-    NO_LOGIN = -3, "禁止登录"
 
 
 class YxRoleChoices(models.IntegerChoices):

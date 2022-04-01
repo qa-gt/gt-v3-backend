@@ -1,3 +1,5 @@
+from time import sleep
+
 from django.utils import timezone
 
 from django.contrib.auth import authenticate
@@ -57,7 +59,7 @@ class RegisterView(APIView):
         username = request.data.get('username')
         password = request.data.get('password')
         if User.objects.filter(username=username).exists():
-            return Response({'status': 'error', 'detail': '该用户名已被注册!'})
+            return Response({'status': 'error', 'detail': '该用户名已被注册！'})
         user = User.objects.create_user(username=username, password=password)
         return Response({
             'status': 'success',
@@ -69,15 +71,19 @@ class RegisterView(APIView):
 
 class UserViewSet(ModelViewSet):
     queryset = User.objects.all().order_by('id')
-    serializer_class = UserSerializer
     filter_backends = [DjangoFilterBackend]
     permission_classes = [IsAuthenticatedOrReadOnly, UserPermission]
     filterset_fields = [
         'username', 'is_active', 'ban_state', 'is_staff', 'is_superuser'
     ]
 
+    def get_serializer_class(self):
+        if self.request.method == 'PATCH':
+            return DetailUserSerializer
+        return UserSerializer
+
     def perform_destroy(self, instance):
-        instance.save(state=BanStateChoices.NO_LOGIN)
+        instance.save(active=False)
 
     @action(methods=['post'],
             detail=True,
@@ -104,11 +110,12 @@ class UserViewSet(ModelViewSet):
             permission_classes=[IsAuthenticated],
             url_path='yunxiao_auth')
     def yunxiao_auth(self, request, pk=None):
-        show = request.data.get('show') == 'true' or False
+        show = request.data.get('show') == 'true'
         if request.user.yunxiao_state:
             yunxiao = Yunxiao.objects.get(user=request.user)
             yunxiao.show = show
             yunxiao.save()
+            request.user.yunxiao = yunxiao
             return Response({
                 'status': 'success',
                 'detail': '实名信息展示状态更新成功',

@@ -41,23 +41,26 @@ class ArticleViewSet(ModelViewSet):
 
     def perform_create(self, serializer):
         start_time = timezone.now() - datetime.timedelta(days=1)
-        articles_count = self.request.user.article.filter(create_time__gt=start_time).count()
-        throttle = settings.ARTICLE_CREATE_THROTTLE[0 if self.request.user.yunxiao_state else 1]
+        articles_count = self.request.user.article.filter(
+            create_time__gt=start_time).count()
+        throttle = settings.ARTICLE_CREATE_THROTTLE[0 if self.request.user.
+                                                    yunxiao_state else 1]
         if articles_count > throttle:
-            raise ValidationError('近24小时发帖次数已达上限')
-        if self.request.data.get('_topic'):
-            try:
-                topic = Topic.objects.get(id=self.request.data['_topic'])
-                serializer.save(author=self.request.user, topic=topic)
-            except Topic.DoesNotExist:
-                serializer.save(author=self.request.user, topic_id=0)
+            raise ValidationError({
+                'status': 'error',
+                'detail': '近24小时发帖次数已达上限'
+            })
+        try:
+            topic = Topic.objects.get(id=self.request.data['_topic'])
+            serializer.save(author=self.request.user, topic=topic)
+        except:
+            serializer.save(author=self.request.user, topic_id=0)
 
     def perform_update(self, serializer):
         if self.request.data.get('_topic'):
             try:
                 topic = Topic.objects.get(id=self.request.data['_topic'])
-                serializer.save(topic=topic,
-                                update_time=timezone.now())
+                serializer.save(topic=topic, update_time=timezone.now())
             except Topic.DoesNotExist:
                 serializer.save(topic_id=0, update_time=timezone.now())
 
@@ -90,8 +93,10 @@ class CommentViewSet(ModelViewSet):
 
     def create(self, request, *args, **kwargs):
         start_time = timezone.now() - datetime.timedelta(days=1)
-        comments_count = self.request.user.comment.filter(time__gt=start_time).count()
-        throttle = settings.COMMENT_CREATE_THROTTLE[0 if self.request.user.yunxiao_state else 1]
+        comments_count = self.request.user.comment.filter(
+            time__gt=start_time).count()
+        throttle = settings.COMMENT_CREATE_THROTTLE[0 if self.request.user.
+                                                    yunxiao_state else 1]
         if comments_count > throttle:
             raise ValidationError('近24小时评论次数已达上限')
         content = request.data['content']
@@ -129,19 +134,19 @@ class LikeViewSet(ModelViewSet):
             if article.exists():
                 article = article.first()
             else:
-                return Response({'status': 'error', 'detail': '文章不存在!'})
+                return Response({'status': 'error', 'detail': '文章不存在！'})
             if article.like.filter(user=request.user).exists():
                 article.like.filter(user=request.user).first().delete()
                 return Response({
                     'status': 'success',
                     'opt': 'cancel',
-                    'detail': '取消成功!'
+                    'detail': '取消成功！'
                 })
             article.like.get_or_create(user=request.user)
             return Response({
                 'status': 'success',
                 'opt': 'add',
-                'detail': '点赞成功!'
+                'detail': '点赞成功！'
             })
         elif request.data.get('comment'):
             Like.objects.get_or_create(user=request.user,
@@ -162,19 +167,11 @@ class CollectView(mixins.ListModelMixin, GenericViewSet):
         if article.exists():
             article = article.first()
         else:
-            return Response({'status': 'error', 'detail': '文章不存在!'})
+            return Response({'status': 'error', 'detail': '文章不存在！'})
         Collect.objects.get_or_create(user=request.user, article=article)
-        return Response({'status': 'success', 'detail': '收藏成功!'})
+        return Response({'status': 'success', 'detail': '收藏成功！'})
 
     def destroy(self, request, *args, **kwargs):
-        article = Article.objects.filter(id=request.data['article'])
-        if article.exists():
-            article = article.first()
-        else:
-            return Response({'status': 'error', 'detail': '文章不存在!'})
-        collect = Collect.objects.filter(user=request.user, article=article)
-        if collect.exists():
-            collect.first().delete()
-            return Response({'status': 'success', 'detail': '取消成功!'})
-        else:
-            return Response({'status': 'error', 'detail': '收藏不存在!'})
+        Collect.objects.filter(user=request.user,
+                               article_id=request.GET['article']).delete()
+        return Response({'status': 'success', 'detail': '取消成功！'})

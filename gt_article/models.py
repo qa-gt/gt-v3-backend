@@ -1,4 +1,5 @@
 from django.db import models
+from mdeditor.fields import MDTextField
 
 from gt_user.models import User
 
@@ -36,7 +37,7 @@ class Topic(models.Model):
                                      verbose_name='状态')
 
     def __str__(self):
-        return f'{self.id}:{self.name}'
+        return f'[{self.id}] {self.name}'
 
     class Meta:
         db_table = 'topic'
@@ -51,7 +52,7 @@ class Article(models.Model):
         verbose_name='作者',
     )
     title = models.CharField(max_length=100, verbose_name='标题')
-    content = models.TextField(verbose_name='正文')
+    content = MDTextField(verbose_name='正文')
     create_time = models.DateTimeField(auto_now_add=True, verbose_name='创建时间')
     update_time = models.DateTimeField(auto_now_add=True, verbose_name='更新时间')
     state = models.SmallIntegerField(
@@ -71,7 +72,7 @@ class Article(models.Model):
     read_count = models.IntegerField(default=0, verbose_name='阅读数')
 
     def __str__(self):
-        return f'{self.id}:{self.title}'
+        return f'[{self.id}] {self.title}'
 
     class Meta:
         db_table = 'article'

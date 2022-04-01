@@ -6,7 +6,10 @@ from rest_framework.response import Response
 from rest_framework.viewsets import ModelViewSet, mixins, GenericViewSet
 from django_filters.rest_framework import DjangoFilterBackend
 from rest_framework.filters import SearchFilter
+from rest_framework.exceptions import ValidationError
 from django.utils import timezone
+from django.conf import settings
+import datetime
 
 from .models import *
 from .permissions import *
@@ -37,21 +40,26 @@ class ArticleViewSet(ModelViewSet):
         return ArticleSerializer
 
     def perform_create(self, serializer):
+        start_time = timezone.now() - datetime.timedelta(days=1)
+        articles_count = self.request.user.article.filter(create_time__gt=start_time).count()
+        throttle = settings.ARTICLE_CREATE_THROTTLE[0 if self.request.user.yunxiao_state else 1]
+        if articles_count > throttle:
+            raise ValidationError('近24小时发帖次数已达上限')
         if self.request.data.get('_topic'):
-            topic = Topic.objects.filter(id=self.request.data['_topic'])
-            if topic.exists():
-                serializer.save(author=self.request.user, topic=topic.first())
-                return
-        serializer.save(author=self.request.user, topic_id=0)
+            try:
+                topic = Topic.objects.get(id=self.request.data['_topic'])
+                serializer.save(author=self.request.user, topic=topic)
+            except Topic.DoesNotExist:
+                serializer.save(author=self.request.user, topic_id=0)
 
     def perform_update(self, serializer):
         if self.request.data.get('_topic'):
-            topic = Topic.objects.filter(id=self.request.data['_topic'])
-            if topic.exists():
-                serializer.save(topic=topic.first(),
+            try:
+                topic = Topic.objects.get(id=self.request.data['_topic'])
+                serializer.save(topic=topic,
                                 update_time=timezone.now())
-                return
-        serializer.save(topic_id=0, update_time=timezone.now())
+            except Topic.DoesNotExist:
+                serializer.save(topic_id=0, update_time=timezone.now())
 
     def perform_destroy(self, instance):
         instance.state = ArticleStateChoices.DELETE
@@ -81,6 +89,11 @@ class CommentViewSet(ModelViewSet):
         return DetailCommentSerializer
 
     def create(self, request, *args, **kwargs):
+        start_time = timezone.now() - datetime.timedelta(days=1)
+        comments_count = self.request.user.comment.filter(time__gt=start_time).count()
+        throttle = settings.COMMENT_CREATE_THROTTLE[0 if self.request.user.yunxiao_state else 1]
+        if comments_count > throttle:
+            raise ValidationError('近24小时评论次数已达上限')
         content = request.data['content']
         author = request.user
         article_id = request.data['article']

@@ -8,8 +8,16 @@ class Followed(serializers.ReadOnlyField):
 
     def to_representation(self, value):
         request = self.context.get('request')
-        print(value.all(), request.user)
         return value.filter(follower=request.user).exists()
+
+class YunxiaoField(serializers.ReadOnlyField):
+    def to_internal_value(self, data):
+        pass
+
+    def to_representation(self, value):
+        if value.show:
+            return f'{value.real_name}({value.student_id[:4]}****)'
+        return ''
 
 
 class SimpleUserSerializer(serializers.ModelSerializer):
@@ -20,10 +28,7 @@ class SimpleUserSerializer(serializers.ModelSerializer):
 
 
 class UserSerializer(serializers.ModelSerializer):
-    yunxiao = serializers.SlugRelatedField(slug_field='show',
-                                           read_only=True,
-                                           allow_null=True,
-                                           many=True)
+    yunxiao = YunxiaoField()
     followed = Followed(source="follower")
 
     class Meta:
@@ -35,11 +40,7 @@ class UserSerializer(serializers.ModelSerializer):
 
 
 class DetailUserSerializer(serializers.ModelSerializer):
-    yunxiao = serializers.SlugRelatedField(slug_field='show',
-                                           read_only=True,
-                                           allow_null=True,
-                                           many=True)
-
+    yunxiao = YunxiaoField()
     # followed = Followed(source="follower")
 
     class Meta:

@@ -16,7 +16,7 @@ class BanStateChoices(models.IntegerChoices):
 
 
 class YxRoleChoices(models.IntegerChoices):
-    UNKNOWN = 0, '位置'
+    UNKNOWN = 0, '未知'
     STUDENT = 1, '学生'
     TEACHER = 2, '老师'
 
@@ -44,10 +44,17 @@ class User(AbstractUser):
                             blank=True,
                             default="",
                             verbose_name="认证信息")
-    yunxiao_state = models.BooleanField(default=False, verbose_name='云校认证')
 
     def __str__(self):
         return f"[{self.id}] {self.username}"
+
+    @property
+    def yunxiao_state(self):
+        try:
+            self.yunxiao
+            return True
+        except Yunxiao.DoesNotExist:
+            return False
 
     class Meta:
         db_table = "user"
@@ -81,7 +88,7 @@ class Follow(models.Model):
 
 
 class Yunxiao(models.Model):
-    user = models.ForeignKey(User,
+    user = models.OneToOneField(User,
                              on_delete=models.CASCADE,
                              related_name='yunxiao',
                              verbose_name='用户')
@@ -94,12 +101,7 @@ class Yunxiao(models.Model):
         unique=True,
     )
     real_name = models.CharField(max_length=10, verbose_name='真实姓名')
-    show = models.CharField(
-        max_length=30,
-        verbose_name='显示姓名',
-        null=True,
-        blank=True,
-    )
+    show = models.BooleanField(default=False, verbose_name='显示认证信息')
     gender = models.SmallIntegerField(
         default=GenderChoices.SECRET,
         choices=GenderChoices.choices,

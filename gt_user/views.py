@@ -104,13 +104,10 @@ class UserViewSet(ModelViewSet):
             permission_classes=[IsAuthenticated],
             url_path='yunxiao_auth')
     def yunxiao_auth(self, request, pk=None):
-        show = request.data.get('show') == 'true' or None
+        show = request.data.get('show') == 'true' or False
         if request.user.yunxiao_state:
             yunxiao = Yunxiao.objects.get(user=request.user)
-            if show:
-                yunxiao.show = f"{yunxiao.real_name}({yunxiao.student_id[:4]}****)"
-            else:
-                yunxiao.show = ""
+            yunxiao.show = show
             yunxiao.save()
             return Response({
                 'status': 'success',
@@ -127,8 +124,6 @@ class UserViewSet(ModelViewSet):
         r = r['data']
         if Yunxiao.objects.filter(student_id=student_id).exists():
             return Response({'status': 'error', 'detail': '该学号已被绑定'})
-        if show:
-            show = f"{r['real_name']}({student_id[:4]}****)"
         yunxiao = Yunxiao(
             user=request.user,
             student_id=student_id,
@@ -140,8 +135,6 @@ class UserViewSet(ModelViewSet):
             gender=r['gender'],
         )
         yunxiao.save()
-        request.user.yunxiao_state = True
-        request.user.save()
         return Response({
             'status': 'success',
             'detail': '认证成功',

@@ -5,3 +5,4 @@ psycopg2~=2.9.3
 requests~=2.22.0
 django-filter~=21.1
 musicapi~=0.3.3
+django-mdeditor~=0.1.20

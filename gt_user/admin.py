@@ -1,9 +1,14 @@
 from django.contrib import admin
 from django.contrib.auth.admin import UserAdmin as BaseUserAdmin, GroupAdmin as BaseGroupAdmin
 
-from .models import User, Group, BaseGroup, Follow
+from .models import User, Group, BaseGroup, Follow, Yunxiao
 
 admin.site.unregister(BaseGroup)
+
+
+class YunxiaoInline(admin.TabularInline):
+    model = Yunxiao
+    extra = 0
 
 
 @admin.register(User)
@@ -18,6 +23,7 @@ class UserAdmin(BaseUserAdmin):
          'is_superuser', 'groups', 'user_permissions')}),
         ('时间信息', {'fields': ('last_login', 'date_joined')}),
     )
+    inlines = [YunxiaoInline]
 
 
 @admin.register(Group)
@@ -27,4 +33,4 @@ class GroupAdmin(BaseGroupAdmin):
 
 @admin.register(Follow)
 class FollowAdmin(admin.ModelAdmin):
-    pass
+    list_display = ('id', 'follower', 'following', 'follow_time')

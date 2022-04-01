@@ -52,6 +52,7 @@ INSTALLED_APPS = [
     'django.contrib.staticfiles',
     'rest_framework',
     'django_filters',
+    'mdeditor',
     "gt_user.apps.GtUserConfig",
     "gt_article.apps.GtArticleConfig",
     "gt_notice.apps.GtNoticeConfig",
@@ -174,6 +175,8 @@ REST_FRAMEWORK = {
 
 AUTH_USER_MODEL = 'gt_user.User'
 
+X_FRAME_OPTIONS = 'SAMEORIGIN'
+
 # Internationalization
 # https://docs.djangoproject.com/en/4.0/topics/i18n/
 
@@ -204,3 +207,7 @@ DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 JWT_PREFIX = 'JWT'
 
 JWT_EXPIRE_TIME = datetime.timedelta(days=1)
+
+ARTICLE_CREATE_THROTTLE = [50, 1]  # 已认证，未认证
+
+COMMENT_CREATE_THROTTLE = [10000, 15]  # 已认证，未认证

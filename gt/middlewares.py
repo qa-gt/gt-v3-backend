@@ -37,8 +37,7 @@ class GtCheck:
                 'status': 'error',
                 'detail': '非法请求'
             }, status=403)
-        if request.method in ('POST', 'PUT', 'PATCH') and request.GET.get(
-                'ssssign') != 'disable':
+        if request.method in ('POST', 'PUT', 'PATCH') and not request.path.startswith('/admin/'):
             try:
                 raw_data = base64.b64decode(request.body)
                 cryptor = AES.new(settings.WEBGUARD_KEY,

@@ -70,11 +70,10 @@ class ArticleViewSet(ModelViewSet):
 
 
 class CommentViewSet(ModelViewSet):
-    queryset = Comment.objects.all().order_by('id')
+    queryset = Comment.objects.filter(state__gte=0).order_by('id')
     permission_classes = [IsAuthenticatedOrReadOnly, NoEdit, CommentPermission]
     filter_backends = [DjangoFilterBackend]
     filterset_class = CommentFilter
-    pagination_class = None
 
     def get_serializer_class(self):
         if self.action == 'list':

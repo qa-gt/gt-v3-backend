@@ -27,6 +27,10 @@ class ArticleFilter(filters.FilterSet):
 
 
 class LikeFilter(filters.FilterSet):
+    article = filters.NumberFilter(field_name="article",
+                                   lookup_expr='exact',
+                                   required=True)
+
     class Meta:
         model = Like
         fields = {
@@ -37,6 +41,9 @@ class LikeFilter(filters.FilterSet):
 
 class CommentFilter(filters.FilterSet):
     min_state = filters.NumberFilter(field_name="state", lookup_expr='gte')
+    article = filters.NumberFilter(field_name="article",
+                                   lookup_expr='exact',
+                                   required=True)
 
     class Meta:
         model = Comment

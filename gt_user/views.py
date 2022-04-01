@@ -69,7 +69,7 @@ class RegisterView(APIView):
 
 class UserViewSet(ModelViewSet):
     queryset = User.objects.all().order_by('id')
-    serializer_class = DetailUserSerializer
+    serializer_class = UserSerializer
     filter_backends = [DjangoFilterBackend]
     permission_classes = [IsAuthenticatedOrReadOnly, UserPermission]
     filterset_fields = [

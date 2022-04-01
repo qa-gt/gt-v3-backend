@@ -111,7 +111,7 @@ elif GT_SERVER.startswith("TEST"):
     DATABASES = {
         'default': {
             'ENGINE': 'django.db.backends.postgresql',
-            'NAME': 'gttest',
+            'NAME': 'gt',
             'USER': GT_POSTGRESQL["USER"],
             'PASSWORD': GT_POSTGRESQL['PASSWORD'],
             'HOST': GT_POSTGRESQL["HOST"],

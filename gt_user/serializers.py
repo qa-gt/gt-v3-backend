@@ -39,14 +39,14 @@ class DetailUserSerializer(serializers.ModelSerializer):
                                            read_only=True,
                                            allow_null=True,
                                            many=True)
-    followed = Followed(source="follower")
+
+    # followed = Followed(source="follower")
 
     class Meta:
         model = User
         fields = [
             'id', 'username', 'grade', 'gender', 'introduction', 'tags',
-            'portrait', 'ban_state', 'is_staff', 'is_superuser', 'yunxiao',
-            'followed'
+            'portrait', 'ban_state', 'is_staff', 'is_superuser', 'yunxiao'
         ]
         read_only_fields = ('id', 'username', 'yunxiao')
 

@@ -38,6 +38,8 @@ class GtCheck:
                 'detail': '非法请求'
             },
                                 status=403)
+        if request.method == 'OPTIONS':
+            return HttpResponse(status=204)
         if request.method in ('POST', 'PUT', 'PATCH'
                               ) and not request.path.startswith('/admin/'):
             try:

@@ -63,7 +63,6 @@ INSTALLED_APPS = [
 MIDDLEWARE = [
     'gt.middlewares.GtCheck',
     # 'gt.middlewares.GtLog',
-    # 'gt.middlewares.CorsMiddleware',
     'django.middleware.security.SecurityMiddleware',
     'django.contrib.sessions.middleware.SessionMiddleware',
     'django.middleware.common.CommonMiddleware',

@@ -14,6 +14,14 @@ class Collected(serializers.ReadOnlyField):
         return value.filter(user=request.user).exists()
 
 
+class StayOnTop(serializers.ReadOnlyField):
+    def to_internal_value(self, data):
+        pass
+
+    def to_representation(self, value):
+        return value > ArticleStateChoices.NORMAL
+
+
 class TopicSerializer(serializers.ModelSerializer):
     class Meta:
         model = Topic
@@ -22,16 +30,18 @@ class TopicSerializer(serializers.ModelSerializer):
 
 class SimpleArticleSerializer(serializers.ModelSerializer):
     author = SimpleUserSerializer()
+    top = StayOnTop(source="state")
 
     class Meta:
         model = Article
-        fields = ('id', 'author', 'title', 'read_count', 'update_time')
+        fields = ('id', 'author', 'title', 'read_count', 'update_time', 'top')
 
 
 class ArticleSerializer(serializers.ModelSerializer):
     author = UserSerializer(required=False)
     topic = TopicSerializer(required=False)
     collected = Collected(source="collect")
+    top = StayOnTop(source="state")
 
     class Meta:
         model = Article

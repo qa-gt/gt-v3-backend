@@ -26,7 +26,7 @@ class RobotCheck(BasePermission):
         token = request.data.get('recaptcha')
         if token:
             r = post(
-                "https://www.recaptcha.net/recaptcha/api/siteverify", {
+                "https://recaptcha.google.cn/recaptcha/api/siteverify", {
                     'response': token,
                     'ip': request.ip,
                     'secret': settings.RECAPTCHA_SECRET,

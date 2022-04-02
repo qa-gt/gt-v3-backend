@@ -39,6 +39,8 @@ DOGE_SECRET = "bddd22a41d3a4005de57ffec66ef427c"
 WEBGUARD_KEY = b"Y!^JgOQA~DbuTLX8"
 WEBGUARD_IV = b"xv4!DA?plX*dnn3f"
 
+FPJS_SECRET = "ukAQsdMAwsfck7ZaHw9k"
+
 ALLOWED_HOSTS = ["*"]
 
 # Application definition
@@ -104,6 +106,12 @@ if GT_SERVER.startswith("DEVELOPMENT"):
             'NAME': 'db.sqlite3',
         }
     }
+    CACHES = {
+        'default': {
+            'BACKEND': 'django.core.cache.backends.locmem.LocMemCache',
+            'LOCATION': 'unique-snowflake'
+        }
+    }
 elif GT_SERVER.startswith("TEST"):
     GT_SERVER = "TEST"
     print("-----GT_SERVER is TEST-----")
@@ -118,6 +126,12 @@ elif GT_SERVER.startswith("TEST"):
             'PORT': GT_POSTGRESQL["PORT"],
         },
     }
+    CACHES = {
+        'default': {
+            'BACKEND': 'django.core.cache.backends.locmem.LocMemCache',
+            'LOCATION': 'unique-snowflake'
+        }
+    }
 else:
     GT_SERVER = "PRODUCTION"
     print("-----GT_SERVER is PRODUCTION-----")
@@ -131,6 +145,12 @@ else:
             'HOST': GT_POSTGRESQL["HOST"],
             'PORT': GT_POSTGRESQL["PORT"],
         },
+    }
+    CACHES = {
+        'default': {
+            'BACKEND': 'django.core.cache.backends.memcached.MemcachedCache',
+            'LOCATION': '127.0.0.1:11211',
+        }
     }
 
 # Password validation

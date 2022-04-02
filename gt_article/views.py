@@ -5,16 +5,19 @@ from rest_framework.decorators import action
 from rest_framework.response import Response
 from rest_framework.viewsets import ModelViewSet, mixins, GenericViewSet
 from django_filters.rest_framework import DjangoFilterBackend
-from rest_framework.filters import SearchFilter
+from rest_framework.filters import SearchFilter, OrderingFilter
 from rest_framework.exceptions import ValidationError
 from django.utils import timezone
 from django.conf import settings
 import datetime
 
+from gt.permissions import RobotCheck
+
 from .models import *
 from .permissions import *
 from .serializers import *
 from .filters import *
+
 
 
 class TopicViewSet(ModelViewSet):
@@ -29,10 +32,11 @@ class TopicViewSet(ModelViewSet):
 class ArticleViewSet(ModelViewSet):
     queryset = Article.objects.filter(
         state__gt=ArticleStateChoices.HIDE).order_by('-id')
-    permission_classes = [IsAuthenticatedOrReadOnly, ArticlePermission]
-    filter_backends = [DjangoFilterBackend, SearchFilter]
+    permission_classes = [IsAuthenticatedOrReadOnly, ArticlePermission, RobotCheck]
+    filter_backends = [DjangoFilterBackend, SearchFilter, OrderingFilter]
     filterset_class = ArticleFilter
     search_fields = ['title', 'content']
+    ordering_fields = ['state', 'create_time']
 
     def get_serializer_class(self):
         if self.action == 'list':
@@ -53,7 +57,7 @@ class ArticleViewSet(ModelViewSet):
         try:
             topic = Topic.objects.get(id=self.request.data['_topic'])
             serializer.save(author=self.request.user, topic=topic)
-        except:
+        except Topic.DoesNotExist:
             serializer.save(author=self.request.user, topic_id=0)
 
     def perform_update(self, serializer):
@@ -82,7 +86,7 @@ class ArticleViewSet(ModelViewSet):
 
 class CommentViewSet(ModelViewSet):
     queryset = Comment.objects.filter(state__gte=0).order_by('id')
-    permission_classes = [IsAuthenticatedOrReadOnly, NoEdit, CommentPermission]
+    permission_classes = [IsAuthenticatedOrReadOnly, NoEdit, CommentPermission, RobotCheck]
     filter_backends = [DjangoFilterBackend]
     filterset_class = CommentFilter
 

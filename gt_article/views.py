@@ -19,7 +19,6 @@ from .serializers import *
 from .filters import *
 
 
-
 class TopicViewSet(ModelViewSet):
     filter_backends = [DjangoFilterBackend]
     filterset_class = TopicFilter
@@ -32,7 +31,9 @@ class TopicViewSet(ModelViewSet):
 class ArticleViewSet(ModelViewSet):
     queryset = Article.objects.filter(
         state__gt=ArticleStateChoices.HIDE).order_by('-id')
-    permission_classes = [IsAuthenticatedOrReadOnly, ArticlePermission, RobotCheck]
+    permission_classes = [
+        IsAuthenticatedOrReadOnly, ArticlePermission, RobotCheck
+    ]
     filter_backends = [DjangoFilterBackend, SearchFilter, OrderingFilter]
     filterset_class = ArticleFilter
     search_fields = ['title', 'content']
@@ -57,7 +58,7 @@ class ArticleViewSet(ModelViewSet):
         try:
             topic = Topic.objects.get(id=self.request.data['_topic'])
             serializer.save(author=self.request.user, topic=topic)
-        except:
+        except (Topic.DoesNotExist, KeyError):
             serializer.save(author=self.request.user, topic_id=0)
 
     def perform_update(self, serializer):
@@ -86,7 +87,9 @@ class ArticleViewSet(ModelViewSet):
 
 class CommentViewSet(ModelViewSet):
     queryset = Comment.objects.filter(state__gte=0).order_by('id')
-    permission_classes = [IsAuthenticatedOrReadOnly, NoEdit, CommentPermission, RobotCheck]
+    permission_classes = [
+        IsAuthenticatedOrReadOnly, NoEdit, CommentPermission, RobotCheck
+    ]
     filter_backends = [DjangoFilterBackend]
     filterset_class = CommentFilter
 

@@ -235,6 +235,6 @@ JWT_PREFIX = 'JWT'
 
 JWT_EXPIRE_TIME = datetime.timedelta(days=1)
 
-ARTICLE_CREATE_THROTTLE = [50, 1]  # 已认证，未认证
+ARTICLE_CREATE_THROTTLE = [15, 1]  # 已认证，未认证
 
-COMMENT_CREATE_THROTTLE = [10000, 15]  # 已认证，未认证
+COMMENT_CREATE_THROTTLE = [150, 15]  # 已认证，未认证

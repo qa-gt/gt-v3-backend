@@ -36,7 +36,7 @@ class ArticleViewSet(ModelViewSet):
     filter_backends = [DjangoFilterBackend, SearchFilter, OrderingFilter]
     filterset_class = ArticleFilter
     search_fields = ['title', 'content']
-    ordering_fields = ['state', 'create_time']
+    ordering_fields = ['state', 'create_time', 'id']
 
     def get_serializer_class(self):
         if self.action == 'list':

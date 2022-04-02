@@ -1,5 +1,3 @@
-from time import sleep
-
 from django.utils import timezone
 
 from django.contrib.auth import authenticate

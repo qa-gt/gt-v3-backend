@@ -1,6 +1,7 @@
 import gt_user.views
 import gt_article.views
 import gt_utils.views
+import gt_notice.views
 from django.contrib import admin
 from django.urls import include, path, re_path
 from rest_framework.routers import DefaultRouter
@@ -14,6 +15,7 @@ router.register('like', gt_article.views.LikeViewSet)
 router.register(r'comment', gt_article.views.CommentViewSet)
 router.register(r'collect', gt_article.views.CollectView)
 router.register(r'follow', gt_user.views.FollowView)
+router.register(r'notice', gt_notice.views.NoticeView, basename='notice')
 
 urlpatterns = [
     re_path(r'^', include(router.urls)),

@@ -57,7 +57,7 @@ class ArticleViewSet(ModelViewSet):
         try:
             topic = Topic.objects.get(id=self.request.data['_topic'])
             serializer.save(author=self.request.user, topic=topic)
-        except Topic.DoesNotExist:
+        except:
             serializer.save(author=self.request.user, topic_id=0)
 
     def perform_update(self, serializer):

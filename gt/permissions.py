@@ -31,7 +31,6 @@ class RobotCheck(BasePermission):
                     'ip': request.ip,
                     'secret': settings.RECAPTCHA_SECRET,
                 }).json()
-            print(r)
             if not r['success']:
                 raise AuthenticationFailed({
                     'status': 'error',

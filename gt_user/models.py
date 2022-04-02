@@ -21,7 +21,7 @@ class YxRoleChoices(models.IntegerChoices):
 
 
 class User(AbstractUser):
-    portrait = models.CharField(max_length=50,
+    portrait = models.CharField(max_length=200,
                                 default="",
                                 null=True,
                                 blank=True,

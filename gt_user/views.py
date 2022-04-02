@@ -15,6 +15,7 @@ from rest_framework.filters import SearchFilter
 from requests import get
 
 from gt.permissions import RobotCheck
+from gt_notice.options import add_notice
 
 from .models import *
 from .permissions import *
@@ -60,7 +61,8 @@ class RegisterView(APIView):
         username = request.data.get('username')
         password = request.data.get('password')
         visitorId = request.data.get('visitorId')
-        r = get(f"https://ap.api.fpjs.io/visitors/{visitorId}", params={ "api_key": settings.FPJS_SECRET })
+        r = get(f"https://ap.api.fpjs.io/visitors/{visitorId}",
+                params={"api_key": settings.FPJS_SECRET})
         if r.status_code != 200:
             return Response({'status': 'error', 'detail': '校验失败！'})
         last_create = cache.get(f"fp{visitorId}")
@@ -103,6 +105,12 @@ class UserViewSet(ModelViewSet):
         follow = user.follower.filter(follower=request.user)
         if not follow.exists():
             Follow.objects.create(follower=request.user, following=user)
+        add_notice(
+            user,
+            '有人关注了你',
+            f'{request.user.username}关注了你',
+            f'/user/{user.id}',
+        )
         return Response({'status': 'success', 'detail': '关注成功'})
 
     @action(methods=['post'],

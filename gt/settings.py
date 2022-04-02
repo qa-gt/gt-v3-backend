@@ -56,8 +56,8 @@ INSTALLED_APPS = [
     'django_filters',
     'mdeditor',
     "gt_user.apps.GtUserConfig",
-    "gt_article.apps.GtArticleConfig",
     "gt_notice.apps.GtNoticeConfig",
+    "gt_article.apps.GtArticleConfig",
     "gt_admin.apps.GtAdminConfig",
     'gt_utils.apps.GtUtilsConfig',
 ]

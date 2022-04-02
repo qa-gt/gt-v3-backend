@@ -1,5 +1,15 @@
+from django.contrib.auth.models import AbstractUser
+from django.contrib.auth.models import Group as BaseGroup
+from django.core import validators
 from django.db import models
-from django.contrib.auth.models import AbstractUser, Group as BaseGroup
+from django.utils.deconstruct import deconstructible
+
+
+@deconstructible
+class UnicodeUsernameValidator(validators.RegexValidator):
+    regex = r'^[\w\u4e00-\u9fa5@+-.·]+\Z'
+    message = '支持字母、数字、汉字和.·-@符号'
+    flags = 0
 
 
 class GenderChoices(models.IntegerChoices):
@@ -21,6 +31,16 @@ class YxRoleChoices(models.IntegerChoices):
 
 
 class User(AbstractUser):
+    username = models.CharField(
+        '用户名',
+        max_length=30,
+        unique=True,
+        help_text='必填',
+        validators=[UnicodeUsernameValidator],
+        error_messages={
+            'unique': "用户已存在",
+        },
+    )
     portrait = models.CharField(max_length=200,
                                 default="",
                                 null=True,
@@ -88,9 +108,9 @@ class Follow(models.Model):
 
 class Yunxiao(models.Model):
     user = models.OneToOneField(User,
-                             on_delete=models.CASCADE,
-                             related_name='yunxiao',
-                             verbose_name='用户')
+                                on_delete=models.CASCADE,
+                                related_name='yunxiao',
+                                verbose_name='用户')
     student_id = models.CharField(
         max_length=20,
         unique=True,

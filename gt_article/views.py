@@ -12,6 +12,7 @@ from django.conf import settings
 import datetime
 
 from gt.permissions import RobotCheck
+from gt_notice.options import add_notice
 
 from .models import *
 from .permissions import *
@@ -108,15 +109,28 @@ class CommentViewSet(ModelViewSet):
             raise ValidationError('近24小时评论次数已达上限')
         content = request.data['content']
         author = request.user
-        article_id = request.data['article']
+        atc_id = request.data['article']
         reply = request.data.get('reply')
         reply = reply and Comment.objects.filter(id=reply)
         reply = reply and reply.exists() and reply.first()
-        reply = reply and reply.article.id == int(article_id) and reply or None
+        reply = reply and reply.article.id == int(atc_id) and reply or None
         Comment.objects.create(author=author,
-                               article_id=article_id,
+                               article_id=atc_id,
                                reply=reply,
                                content=content)
+        if reply:
+            add_notice(
+                Article.objects.get(id=atc_id).author,
+                f"{author.username}评论了你的文章",
+                f"回复{reply.author.username}的评论：{content}",
+                f"/article/{atc_id}",
+            )
+            add_notice(
+                reply.author,
+                f"{author.username}回复了你的评论",
+                f"回复内容：{content}",
+                f"/article/{atc_id}",
+            )
         return Response(status=201)
 
     def perform_destroy(self, instance):
@@ -150,6 +164,12 @@ class LikeViewSet(ModelViewSet):
                     'detail': '取消成功！'
                 })
             article.like.get_or_create(user=request.user)
+            add_notice(
+                article.author,
+                f"{request.user.username}点赞了你的文章",
+                "",
+                f"/article/{article.id}",
+            )
             return Response({
                 'status': 'success',
                 'opt': 'add',

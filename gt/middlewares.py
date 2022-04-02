@@ -69,7 +69,7 @@ class GtCheck:
         # Get real IP
         setattr(
             request, 'ip',
-            request.headers.get('Ali-CDN-Real-IP')
+            request.headers.get('X-Forwarded-For')
             or request.META['REMOTE_ADDR'])
         response = self.get_response(request)
         return response

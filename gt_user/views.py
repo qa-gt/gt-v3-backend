@@ -1,6 +1,8 @@
 from django.utils import timezone
 
 from django.contrib.auth import authenticate
+from django.conf import settings
+from django.core.cache import cache
 from gt import jencode
 from rest_framework.exceptions import AuthenticationFailed
 from rest_framework.response import Response
@@ -10,6 +12,7 @@ from rest_framework.viewsets import ModelViewSet, ReadOnlyModelViewSet
 from rest_framework.permissions import *
 from django_filters.rest_framework import DjangoFilterBackend
 from rest_framework.filters import SearchFilter
+from requests import get
 
 from gt.permissions import RobotCheck
 
@@ -56,9 +59,17 @@ class RegisterView(APIView):
     def post(request):
         username = request.data.get('username')
         password = request.data.get('password')
+        visitorId = request.data.get('visitorId')
+        r = get(f"https://ap.api.fpjs.io/visitors/{visitorId}", params={ "api_key": settings.FPJS_SECRET })
+        if r.status_code != 200:
+            return Response({'status': 'error', 'detail': '校验失败！'})
+        last_create = cache.get(f"fp{visitorId}")
+        if last_create is not None:
+            return Response({'status': 'error', 'detail': '当日只能注册一个账号！'})
         if User.objects.filter(username=username).exists():
             return Response({'status': 'error', 'detail': '该用户名已被注册！'})
         user = User.objects.create_user(username=username, password=password)
+        cache.set(f"fp{visitorId}", user.date_joined, 24 * 2600)
         return Response({
             'status': 'success',
             'detail': '注册成功',

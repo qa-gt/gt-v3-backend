@@ -13,9 +13,7 @@ class TopicFilter(filters.FilterSet):
 
 
 class ArticleFilter(filters.FilterSet):
-    min_state = filters.NumberFilter(field_name="state", lookup_expr='gte')
-
-    # q = filters.CharFilter(field_name="title", lookup_expr='icontains')
+    state__in = filters.BaseInFilter(field_name='state', lookup_expr='in')
 
     class Meta:
         model = Article

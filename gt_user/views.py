@@ -39,7 +39,7 @@ class LoginView(APIView):
                 'status': 'forbidden',
                 'detail': '用户名或密码错误'
             })
-        if not user.is_active:
+        if (not user.is_active) or (user.wechat and not user.wechat.is_active):
             raise AuthenticationFailed({
                 'status': 'forbidden',
                 'detail': '用户被封禁'

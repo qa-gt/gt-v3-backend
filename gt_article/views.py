@@ -11,7 +11,7 @@ from django.utils import timezone
 from django.conf import settings
 import datetime
 
-from gt.permissions import RobotCheck
+from gt.permissions import RobotCheck, RequireWeChat
 from gt_notice.options import add_notice
 
 from .models import *
@@ -35,7 +35,7 @@ class ArticleViewSet(ModelViewSet):
     queryset = Article.objects.filter(
         state__gt=ArticleStateChoices.HIDE).order_by('-id')
     permission_classes = [
-        IsAuthenticatedOrReadOnly, ArticlePermission, RobotCheck
+        IsAuthenticatedOrReadOnly, ArticlePermission, RobotCheck, RequireWeChat
     ]
     filter_backends = [DjangoFilterBackend, SearchFilter, OrderingFilter]
     filterset_class = ArticleFilter

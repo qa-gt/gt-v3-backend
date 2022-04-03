@@ -11,7 +11,7 @@ from rest_framework.viewsets import ModelViewSet, ReadOnlyModelViewSet
 from rest_framework.permissions import *
 from django_filters.rest_framework import DjangoFilterBackend
 from rest_framework.filters import SearchFilter
-from rest_framework.parsers import MultiPartParser
+from rest_framework.parsers import FormParser
 from requests import get
 
 from gt.permissions import RobotCheck
@@ -201,7 +201,7 @@ class UserViewSet(ModelViewSet):
             detail=False,
             authentication_classes=[],
             permission_classes=[],
-            parser_classes=[MultiPartParser],
+            parser_classes=[FormParser],
             url_path='wechat_update')
     def wechat_update(self, request, pk=None):
         cache.set(

@@ -30,6 +30,22 @@ class YxRoleChoices(models.IntegerChoices):
     TEACHER = 2, '老师'
 
 
+class WeChat(models.Model):
+    unique_id = models.CharField(
+        max_length=20,
+        unique=True,
+        verbose_name='微信ID')
+    is_active = models.BooleanField(default=True, verbose_name='是否有效')
+    time = models.DateTimeField(auto_now_add=True, verbose_name='认证时间')
+
+    def __str__(self):
+        return f"{self.unique_id}微信认证"
+
+    class Meta:
+        db_table = "wechat"
+        verbose_name = verbose_name_plural = "微信认证"
+
+
 class User(AbstractUser):
     username = models.CharField(
         '用户名',
@@ -63,6 +79,12 @@ class User(AbstractUser):
                             blank=True,
                             default="",
                             verbose_name="认证信息")
+    wechat = models.ForeignKey(WeChat,
+                               on_delete=models.CASCADE,
+                               null=True,
+                               blank=True,
+                               related_name='user',
+                               verbose_name='微信认证')
 
     def __str__(self):
         return f"[{self.id}] {self.username}"

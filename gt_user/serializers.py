@@ -20,6 +20,13 @@ class YunxiaoField(serializers.ReadOnlyField):
             return f'{value.real_name}({value.student_id[:4]}****)'
         return ''
 
+class WeChatField(serializers.ReadOnlyField):
+    def to_internal_value(self, data):
+        pass
+
+    def to_representation(self, value):
+        return f"{value.unique_id[:4]}****"
+
 
 class SimpleUserSerializer(serializers.ModelSerializer):
     class Meta:
@@ -42,15 +49,16 @@ class UserSerializer(serializers.ModelSerializer):
 
 class DetailUserSerializer(serializers.ModelSerializer):
     yunxiao = YunxiaoField()
+    wechat = WeChatField()
 
     class Meta:
         model = User
         fields = [
             'id', 'username', 'grade', 'gender', 'introduction', 'tags',
             'portrait', 'ban_state', 'is_staff', 'is_superuser', 'yunxiao',
-            'email'
+            'wechat', 'email'
         ]
-        read_only_fields = ('id', 'username', 'yunxiao')
+        read_only_fields = ('id', 'username', 'yunxiao', 'wechat')
 
 
 class FollowSerializer(serializers.ModelSerializer):

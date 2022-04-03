@@ -1,7 +1,4 @@
-from atexit import register
-from http.client import FORBIDDEN
 from django.utils import timezone
-
 from django.contrib.auth import authenticate
 from django.conf import settings
 from django.core.cache import cache
@@ -14,6 +11,8 @@ from rest_framework.viewsets import ModelViewSet, ReadOnlyModelViewSet
 from rest_framework.permissions import *
 from django_filters.rest_framework import DjangoFilterBackend
 from rest_framework.filters import SearchFilter
+from rest_framework.parsers import MultiPartParser
+from requests import get
 
 from gt.permissions import RobotCheck
 from gt_notice.options import add_notice
@@ -168,6 +167,46 @@ class UserViewSet(ModelViewSet):
             'detail': '认证成功',
             'user': DetailUserSerializer(request.user).data
         })
+
+    @action(methods=['get'],
+            detail=False,
+            permission_classes=[IsAuthenticated],
+            url_path='wechat_auth')
+    def wechat_auth(self, request, pk=None):
+        get_qrcode = request.query_params.get('qrcode') is not None
+        if get_qrcode:
+            r = get('https://server01.vicy.cn/8lXdSX7FSMykbl9nFDWESdc6zfouSAEz/wxLogin/tempUserId',
+                    {'secretKey': settings.VICY_SECRET}).json()['data']
+            return Response({
+                'status': 'success',
+                'data': {
+                    'qrCode': r['qrCodeReturnUrl'],
+                    'tempUserId': r['tempUserId']
+                }
+            })
+        temp_uid = request.query_params.get('tempUID')
+        unique_id = cache.get(f'wechat-{temp_uid}')
+        if unique_id is None:
+            return Response({'status': 'success', 'detail': 'pending'})
+        wechat_data = WeChat.objects.get_or_create(unique_id=unique_id)
+        request.user.wechat = wechat_data
+        request.user.save()
+        return Response({
+            'status': 'success',
+            'detail': 'success',
+            'user': DetailUserSerializer(request.user).data
+        })
+
+    @action(methods=['post'],
+            detail=False,
+            authentication_classes=[],
+            permission_classes=[],
+            parser_classes=[MultiPartParser],
+            url_path='wechat_update')
+    def wechat_update(self, request, pk=None):
+        cache.set(
+            f'wechat-{request.data["tempUserId"]}', request.data["userId"], 10 * 60)
+        return Response({'errcode': 0, 'message': '验证成功'})
 
 
 class FollowView(ReadOnlyModelViewSet):

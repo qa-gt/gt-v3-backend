@@ -1,10 +1,18 @@
 from django.contrib import admin
 from django.contrib.auth.admin import UserAdmin as BaseUserAdmin, GroupAdmin as BaseGroupAdmin
 
-from .models import User, Group, BaseGroup, Follow, Yunxiao
+from attr import field
+
+from .models import User, Group, BaseGroup, Follow, Yunxiao, WeChat
 
 admin.site.unregister(BaseGroup)
 
+
+class UserInline(admin.TabularInline):
+    model = User
+    fields = ['username']
+    readonly_fields = ['username']
+    extra = 0
 
 class YunxiaoInline(admin.TabularInline):
     model = Yunxiao
@@ -18,7 +26,7 @@ class UserAdmin(BaseUserAdmin):
     fieldsets = (
         ('账号信息', {'fields': ('username', 'password')}),
         ('个人信息', {'fields': ('portrait', 'grade',
-         'gender', 'introduction', 'tags')}),
+         'gender', 'introduction', 'tags', 'wechat')}),
         ('权限', {'fields': ('is_active', 'ban_state', 'is_staff',
          'is_superuser', 'groups', 'user_permissions')}),
         ('时间信息', {'fields': ('last_login', 'date_joined')}),
@@ -34,3 +42,9 @@ class GroupAdmin(BaseGroupAdmin):
 @admin.register(Follow)
 class FollowAdmin(admin.ModelAdmin):
     list_display = ('id', 'follower', 'following', 'follow_time')
+
+
+@admin.register(WeChat)
+class WeChatAdmin(admin.ModelAdmin):
+    list_display = ('id', 'unique_id', 'time')
+    inlines = [UserInline]

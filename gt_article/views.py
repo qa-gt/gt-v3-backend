@@ -19,6 +19,8 @@ from .permissions import *
 from .serializers import *
 from .filters import *
 
+FORBIDDEN_WORDS_TITLE = ['wzh', '备案']
+
 
 class TopicViewSet(ModelViewSet):
     filter_backends = [DjangoFilterBackend]
@@ -56,6 +58,11 @@ class ArticleViewSet(ModelViewSet):
                 'status': 'error',
                 'detail': '近24小时发帖次数已达上限'
             })
+        if any(i in self.request.data['title'] for i in FORBIDDEN_WORDS_TITLE):
+            raise AuthenticationFailed({
+                'status': 'error',
+                'detail': '您未能通过人机验证！'
+            })
         try:
             topic = Topic.objects.get(id=self.request.data['_topic'])
             serializer.save(author=self.request.user, topic=topic)
@@ -63,12 +70,11 @@ class ArticleViewSet(ModelViewSet):
             serializer.save(author=self.request.user, topic_id=0)
 
     def perform_update(self, serializer):
-        if self.request.data.get('_topic'):
-            try:
-                topic = Topic.objects.get(id=self.request.data['_topic'])
-                serializer.save(topic=topic, update_time=timezone.now())
-            except Topic.DoesNotExist:
-                serializer.save(topic_id=0, update_time=timezone.now())
+        try:
+            topic = Topic.objects.get(id=self.request.data['_topic'])
+            serializer.save(topic=topic, update_time=timezone.now())
+        except (Topic.DoesNotExist, KeyError):
+            serializer.save(topic_id=0, update_time=timezone.now())
 
     def perform_destroy(self, instance):
         instance.state = ArticleStateChoices.DELETE

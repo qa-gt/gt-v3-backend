@@ -32,7 +32,7 @@ class YxRoleChoices(models.IntegerChoices):
 
 class WeChat(models.Model):
     unique_id = models.CharField(
-        max_length=20,
+        max_length=50,
         unique=True,
         verbose_name='微信ID')
     is_active = models.BooleanField(default=True, verbose_name='是否有效')

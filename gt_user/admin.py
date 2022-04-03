@@ -1,8 +1,6 @@
 from django.contrib import admin
 from django.contrib.auth.admin import UserAdmin as BaseUserAdmin, GroupAdmin as BaseGroupAdmin
 
-from attr import field
-
 from .models import User, Group, BaseGroup, Follow, Yunxiao, WeChat
 
 admin.site.unregister(BaseGroup)

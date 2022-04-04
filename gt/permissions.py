@@ -44,13 +44,15 @@ class RobotCheck(BasePermission):
             else:
                 return True
 
+
 class RequireWeChat(BasePermission):
     def has_permission(self, request, view):
         if request.method in SAFE_METHODS:
             return True
         if request.user and not request.user.wechat:
-             raise AuthenticationFailed({
+            raise AuthenticationFailed({
                 'status': 'error',
-                'detail': '该功能需要您绑定微信后使用！'
+                'detail': '该功能需要您绑定微信后使用！',
+                'action': 'notice_wechat'
             })
         return True

@@ -49,15 +49,15 @@ class ArticleViewSet(ModelViewSet):
 
     def perform_create(self, serializer):
         start_time = timezone.now() - datetime.timedelta(days=1)
-        articles_count = self.request.user.article.filter(
-            create_time__gt=start_time).count()
-        throttle = settings.ARTICLE_CREATE_THROTTLE[0 if self.request.user.
-                                                    yunxiao_state else 1]
-        if articles_count > throttle:
-            raise ValidationError({
-                'status': 'error',
-                'detail': '近24小时发帖次数已达上限'
-            })
+        # articles_count = self.request.user.article.filter(
+        #     create_time__gt=start_time).count()
+        # throttle = settings.ARTICLE_CREATE_THROTTLE[0 if self.request.user.
+        #                                             yunxiao_state else 1]
+        # if articles_count > throttle:
+        #     raise ValidationError({
+        #         'status': 'error',
+        #         'detail': '近24小时发帖次数已达上限'
+        #     })
         if any(i in self.request.data['title'] for i in FORBIDDEN_WORDS_TITLE):
             raise AuthenticationFailed({
                 'status': 'error',
@@ -110,9 +110,9 @@ class CommentViewSet(ModelViewSet):
         comments_count = self.request.user.comment.filter(
             time__gt=start_time).count()
         throttle = settings.COMMENT_CREATE_THROTTLE[0 if self.request.user.
-                                                    yunxiao_state else 1]
+                                                    wechat else 1]
         if comments_count > throttle:
-            raise ValidationError('近24小时评论次数已达上限')
+            raise ValidationError('近24小时评论次数已达上限，请进行微信认证以提高限额')
         content = request.data['content']
         author = request.user
         atc_id = request.data['article']
@@ -135,6 +135,13 @@ class CommentViewSet(ModelViewSet):
                 reply.author,
                 f"{author.username}回复了你的评论",
                 f"回复内容：{content}",
+                f"/article/{atc_id}",
+            )
+        else:
+            add_notice(
+                Article.objects.get(id=atc_id).author,
+                f"{author.username}评论了你的文章",
+                f"{content}",
                 f"/article/{atc_id}",
             )
         return Response(status=201)

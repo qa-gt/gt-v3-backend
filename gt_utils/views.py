@@ -1,10 +1,12 @@
 import time
+
 import musicapi
+from django.conf import settings
 from django.http import HttpResponseRedirect
+from rest_framework.exceptions import ValidationError
+from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
 from rest_framework.views import APIView
-from rest_framework.permissions import IsAuthenticated
-from django.conf import settings
 
 from .dogecloud import dogecloud_api
 
@@ -37,6 +39,8 @@ class UploadKeyView(APIView):
 
     @staticmethod
     def post(request):
+        if not request.user.wechat:
+            raise ValidationError("该功能需要您绑定微信后使用！")
         scope = f"atc_images/{request.ip}/{request.user.id}/*"
         r = dogecloud_api(
             "/auth/tmp_token.json", {

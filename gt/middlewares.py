@@ -29,7 +29,9 @@ class GtCheck:
         self.get_response = get_response
 
     def __call__(self, request):
-        is_exception = request.path.startswith('/admin/') or request.path.startswith('/user/wechat_update/')
+        is_exception = any(
+            request.path.startswith(i)
+            for i in ['/admin/', '/user/wechat_update/'])
         if not is_exception:
             # Check UA
             if not request.headers.get('User-Agent') or not any(
@@ -39,14 +41,14 @@ class GtCheck:
                     'status': 'error',
                     'detail': '非法请求'
                 },
-                    status=403)
+                                    status=403)
             if request.method == 'OPTIONS':
                 return HttpResponse(status=204)
             if request.method in ('POST', 'PUT', 'PATCH'):
                 try:
                     raw_data = base64.b64decode(request.body)
                     cryptor = AES.new(settings.WEBGUARD_KEY, AES.MODE_CBC,
-                                    settings.WEBGUARD_IV)
+                                      settings.WEBGUARD_IV)
                     decrypted_data = cryptor.decrypt(raw_data)
                     decrypted_data = unpad(decrypted_data, cryptor.block_size)
                     stamp_len = int(decrypted_data[0:3])
@@ -66,7 +68,7 @@ class GtCheck:
                         'status': 'error',
                         'detail': '非法请求'
                     },
-                        status=403)
+                                        status=403)
         # Get real IP
         setattr(
             request, 'ip',

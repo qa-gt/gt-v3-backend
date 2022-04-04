@@ -64,8 +64,8 @@ class RegisterView(APIView):
         password = request.data.get('password')
         cache_key = f"register-{request.ip}"
         register_count = int(cache.get(cache_key, 0))
-        if register_count > 0:
-            return Response({'status': 'error', 'detail': '当日只能注册一个账号！'})
+        if register_count > 500:
+            return Response({'status': 'error', 'detail': '当日只能注册账号数已达上限！'})
         if User.objects.filter(username=username).exists():
             return Response({'status': 'error', 'detail': '该用户名已被注册！'})
         if any(i in username for i in FORBIDDEN_WORDS):
@@ -172,11 +172,14 @@ class UserViewSet(ModelViewSet):
             detail=False,
             permission_classes=[IsAuthenticated],
             url_path='wechat_auth')
-    def wechat_auth(self, request, pk=None):
+    def wechat_auth(self, request):
         get_qrcode = request.query_params.get('qrcode') is not None
         if get_qrcode:
-            r = get('https://server01.vicy.cn/8lXdSX7FSMykbl9nFDWESdc6zfouSAEz/wxLogin/tempUserId',
-                    {'secretKey': settings.VICY_SECRET}).json()['data']
+            r = get(
+                'https://server01.vicy.cn/8lXdSX7FSMykbl9nFDWESdc6zfouSAEz/wxLogin/tempUserId',
+                {
+                    'secretKey': settings.VICY_SECRET
+                }).json()['data']
             return Response({
                 'status': 'success',
                 'data': {
@@ -189,7 +192,8 @@ class UserViewSet(ModelViewSet):
         unique_id = cache.get(cache_key)
         if unique_id is None:
             return Response({'status': 'success', 'detail': 'pending'})
-        wechat_data, created = WeChat.objects.get_or_create(unique_id=unique_id)
+        wechat_data, created = WeChat.objects.get_or_create(
+            unique_id=unique_id)
         request.user.wechat = wechat_data
         request.user.save()
         cache.delete(cache_key)
@@ -205,9 +209,9 @@ class UserViewSet(ModelViewSet):
             permission_classes=[],
             parser_classes=[FormParser],
             url_path='wechat_update')
-    def wechat_update(self, request, pk=None):
-        cache.set(
-            f'wechat-{request.data["tempUserId"]}', request.data["userId"], 10 * 60)
+    def wechat_update(self, request):
+        cache.set(f'wechat-{request.data["tempUserId"]}',
+                  request.data["userId"], 10 * 60)
         return Response({'errcode': 0, 'message': '验证成功'})
 
 

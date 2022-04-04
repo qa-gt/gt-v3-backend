@@ -10,6 +10,8 @@ class UserPermission(BasePermission):
         return True
 
     def has_object_permission(self, request, view, obj):
+        if not obj.is_active:
+            return False
         if request.method in SAFE_METHODS:
             return True
         if not request.user or not (request.user.id == obj.id

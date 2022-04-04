@@ -48,7 +48,7 @@ class ArticleViewSet(ModelViewSet):
         return ArticleSerializer
 
     def perform_create(self, serializer):
-        start_time = timezone.now() - datetime.timedelta(days=1)
+        # start_time = timezone.now() - datetime.timedelta(days=1)
         # articles_count = self.request.user.article.filter(
         #     create_time__gt=start_time).count()
         # throttle = settings.ARTICLE_CREATE_THROTTLE[0 if self.request.user.
@@ -95,7 +95,8 @@ class ArticleViewSet(ModelViewSet):
 class CommentViewSet(ModelViewSet):
     queryset = Comment.objects.filter(state__gte=0).order_by('id')
     permission_classes = [
-        IsAuthenticatedOrReadOnly, NoEdit, CommentPermission, RobotCheck
+        IsAuthenticatedOrReadOnly, NoEdit, CommentPermission, RobotCheck,
+        RequireWeChat
     ]
     filter_backends = [DjangoFilterBackend]
     filterset_class = CommentFilter
@@ -106,13 +107,13 @@ class CommentViewSet(ModelViewSet):
         return DetailCommentSerializer
 
     def create(self, request, *args, **kwargs):
-        start_time = timezone.now() - datetime.timedelta(days=1)
-        comments_count = self.request.user.comment.filter(
-            time__gt=start_time).count()
-        throttle = settings.COMMENT_CREATE_THROTTLE[0 if self.request.user.
-                                                    wechat else 1]
-        if comments_count > throttle:
-            raise ValidationError('近24小时评论次数已达上限，请进行微信认证以提高限额')
+        # start_time = timezone.now() - datetime.timedelta(days=1)
+        # comments_count = self.request.user.comment.filter(
+        #     time__gt=start_time).count()
+        # throttle = settings.COMMENT_CREATE_THROTTLE[0 if self.request.user.
+        #                                             wechat else 1]
+        # if comments_count > throttle:
+        #     raise ValidationError('近24小时评论次数已达上限，请进行微信认证以提高限额')
         content = request.data['content']
         author = request.user
         atc_id = request.data['article']

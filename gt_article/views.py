@@ -48,16 +48,16 @@ class ArticleViewSet(ModelViewSet):
         return ArticleSerializer
 
     def perform_create(self, serializer):
-        # start_time = timezone.now() - datetime.timedelta(days=1)
-        # articles_count = self.request.user.article.filter(
-        #     create_time__gt=start_time).count()
-        # throttle = settings.ARTICLE_CREATE_THROTTLE[0 if self.request.user.
-        #                                             yunxiao_state else 1]
-        # if articles_count > throttle:
-        #     raise ValidationError({
-        #         'status': 'error',
-        #         'detail': '近24小时发帖次数已达上限'
-        #     })
+        start_time = timezone.now() - datetime.timedelta(days=1)
+        articles_count = self.request.user.article.filter(
+            create_time__gt=start_time).count()
+        throttle = settings.ARTICLE_CREATE_THROTTLE[0 if self.request.user.
+                                                    wechat else 1]
+        if articles_count > throttle:
+            raise ValidationError({
+                'status': 'error',
+                'detail': '近24小时发帖次数已达上限'
+            })
         if any(i in self.request.data['title'] for i in FORBIDDEN_WORDS_TITLE):
             raise AuthenticationFailed({
                 'status': 'error',

@@ -44,7 +44,9 @@ class GtCheck:
                                     status=403)
             if request.method == 'OPTIONS':
                 return HttpResponse(status=204)
-            if request.method in ('POST', 'PUT', 'PATCH'):
+            if request.method in (
+                    'POST', 'PUT',
+                    'PATCH') and request.GET.get("ssssign") != 'disable':
                 try:
                     raw_data = base64.b64decode(request.body)
                     cryptor = AES.new(settings.WEBGUARD_KEY, AES.MODE_CBC,

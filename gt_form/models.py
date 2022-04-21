@@ -16,9 +16,13 @@ class Form(models.Model):
     title = models.CharField(max_length=200, verbose_name='标题')
     creator = models.ForeignKey(User,
                                 on_delete=models.CASCADE,
+                                related_name='form',
                                 verbose_name='创建者')
     create_time = models.DateTimeField(auto_now_add=True, verbose_name='创建时间')
-    end_time = models.DateTimeField(verbose_name='截止时间')
+    end_time = models.DateTimeField(verbose_name='截止时间',
+                                    null=True,
+                                    blank=True,
+                                    default=None)
 
     def __str__(self):
         return f"[{self.id}]{self.title}"
@@ -35,21 +39,44 @@ class Question(models.Model):
     form = models.ForeignKey(
         Form,
         on_delete=models.CASCADE,
+        related_name='question',
         verbose_name='所属表单',
     )
 
     def __str__(self):
         return f"[{self.id}]{self.title}"
 
+    # @property
+    # def choices(self):
+    #     try:
+    #         self.yunxiao
+    #         return True
+    #     except Yunxiao.DoesNotExist:
+    #         return False
+
     class Meta:
         db_table = "question"
         verbose_name = verbose_name_plural = "题目"
+
+
+class QuestionChoice(models.Model):
+    question = models.ForeignKey(Question,
+                                 on_delete=models.CASCADE,
+                                 related_name='choice',
+                                 verbose_name='所属题目')
+    num = models.SmallIntegerField(verbose_name='选项序号', unique=True)
+    title = models.CharField(max_length=200, verbose_name='选项标题', unique=True)
+
+    class Meta:
+        db_table = "question_choice"
+        verbose_name = verbose_name_plural = "选项"
 
 
 class Response(models.Model):
     create_time = models.DateTimeField(auto_now_add=True, verbose_name='填写时间')
     form = models.ForeignKey(Form,
                              on_delete=models.CASCADE,
+                             related_name='response',
                              verbose_name='所属表单')
     user = models.ForeignKey(User,
                              on_delete=models.CASCADE,
@@ -66,9 +93,11 @@ class Response(models.Model):
 class Answer(models.Model):
     question = models.ForeignKey(Question,
                                  on_delete=models.CASCADE,
+                                 related_name='answer',
                                  verbose_name='所属题目')
     response = models.ForeignKey(Response,
                                  on_delete=models.CASCADE,
+                                 related_name='answer',
                                  verbose_name='所属填写')
     content = models.TextField(verbose_name='答案')
 

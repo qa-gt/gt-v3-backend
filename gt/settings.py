@@ -60,6 +60,7 @@ INSTALLED_APPS = [
     "gt_article.apps.GtArticleConfig",
     "gt_admin.apps.GtAdminConfig",
     'gt_utils.apps.GtUtilsConfig',
+    'gt_form.apps.GtFormConfig',
 ]
 
 MIDDLEWARE = [

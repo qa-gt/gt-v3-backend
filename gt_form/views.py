@@ -26,4 +26,29 @@ class FormView(mixins.RetrieveModelMixin, GenericViewSet):
                                         num=j["num"],
                                         title=j["title"])
                 choice.save()
-        return DRFResponse({"status": "success", "data": FormSerializer(form).data})
+        return DRFResponse(
+            {
+                "status": "success",
+                "data": FormSerializer(form).data
+            },
+            status=201)
+
+
+class ResponseView(GenericViewSet):
+    queryset = Response.objects.all()
+    permission_classes = [IsAuthenticatedOrReadOnly]
+
+    def create(self, request, *args, **kwargs):
+        form = Form.objects.get(id=request.data["form"])
+        response = Response(form=form, user=request.user)
+        response.save()
+        for i in request.data["questions"]:
+            question = Question.objects.get(id=i["id"])
+            for j in i["answer"]:
+                answer = Answer(question=question,
+                                response=response,
+                                choice_id=j)
+                answer.save()
+                if question.type == "radio":
+                    break
+        return DRFResponse({"status": "success"}, status=201)

@@ -13,7 +13,6 @@ import datetime
 
 from gt.permissions import RobotCheck, RequireWeChat
 from gt_notice.options import add_notice
-
 from .models import *
 from .permissions import *
 from .serializers import *

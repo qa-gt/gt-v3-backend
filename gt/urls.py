@@ -21,6 +21,7 @@ router.register(r'form', gt_form.views.FormView, basename='form')
 router.register(r'form_response',
                 gt_form.views.ResponseView,
                 basename='form_response')
+router.register('about', gt_utils.views.AboutView)
 
 urlpatterns = [
     re_path(r'^', include(router.urls)),

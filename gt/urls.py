@@ -18,6 +18,7 @@ router.register(r'collect', gt_article.views.CollectView)
 router.register(r'follow', gt_user.views.FollowView)
 router.register(r'notice', gt_notice.views.NoticeView, basename='notice')
 router.register(r'form', gt_form.views.FormView, basename='form')
+router.register('about', gt_utils.views.AboutView)
 
 urlpatterns = [
     re_path(r'^', include(router.urls)),

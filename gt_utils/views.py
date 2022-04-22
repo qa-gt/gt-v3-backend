@@ -3,11 +3,15 @@ import time
 import musicapi
 from django.conf import settings
 from django.http import HttpResponseRedirect
-from gt.permissions import RequireWeChat
+from gt.permissions import IsAdminOrReadOnly, RequireWeChat
 from rest_framework.exceptions import ValidationError
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
 from rest_framework.views import APIView
+
+from gt_utils.serializers import *
+from rest_framework.viewsets import ModelViewSet, mixins, GenericViewSet
+from rest_framework.permissions import *
 
 from .dogecloud import dogecloud_api
 
@@ -53,6 +57,12 @@ class UploadKeyView(APIView):
         r["scope"] = scope
         return Response({"status": "success", "detail": "获取成功", "data": r})
 
+
+class AboutView(mixins.ListModelMixin, GenericViewSet):
+    permission_classes = [IsAdminOrReadOnly]
+    serializer_class = AboutSerializer
+    queryset = About.objects.all().order_by("time")
+    pagination_class = None
 
 def get_music_url(request):
     url = ""

@@ -5,11 +5,12 @@ from gt_user.models import User
 
 # Create your models here.
 
+NUM_TO_LETTER = list(' ABCDEFGHIJKLMNOPQRSTUVWXYZ')
+
 
 class QuestionTypeChoices(models.IntegerChoices):
     RADIO = 1, '单选题'
     SELECT = 2, '多选题'
-    BLANK = 3, '填空题'
 
 
 class Form(models.Model):
@@ -34,8 +35,8 @@ class Form(models.Model):
 
 class Question(models.Model):
     title = models.CharField(max_length=200, verbose_name='题目标题')
-    type = models.IntegerField(choices=QuestionTypeChoices.choices,
-                               verbose_name='题目类型')
+    type = models.SmallIntegerField(choices=QuestionTypeChoices.choices,
+                                    verbose_name='题目类型')
     form = models.ForeignKey(
         Form,
         on_delete=models.CASCADE,
@@ -45,14 +46,6 @@ class Question(models.Model):
 
     def __str__(self):
         return f"[{self.id}]{self.title}"
-
-    # @property
-    # def choices(self):
-    #     try:
-    #         self.yunxiao
-    #         return True
-    #     except Yunxiao.DoesNotExist:
-    #         return False
 
     class Meta:
         db_table = "question"
@@ -64,8 +57,11 @@ class QuestionChoice(models.Model):
                                  on_delete=models.CASCADE,
                                  related_name='choice',
                                  verbose_name='所属题目')
-    num = models.SmallIntegerField(verbose_name='选项序号', unique=True)
-    title = models.CharField(max_length=200, verbose_name='选项标题', unique=True)
+    num = models.SmallIntegerField(verbose_name='选项序号')
+    title = models.CharField(max_length=200, verbose_name='选项标题')
+
+    def __str__(self):
+        return f"[{NUM_TO_LETTER[self.num]}]{self.title}"
 
     class Meta:
         db_table = "question_choice"
@@ -99,10 +95,12 @@ class Answer(models.Model):
                                  on_delete=models.CASCADE,
                                  related_name='answer',
                                  verbose_name='所属填写')
-    content = models.TextField(verbose_name='答案')
+    choice = models.ForeignKey(QuestionChoice,
+                               on_delete=models.CASCADE,
+                               verbose_name='选项')
 
     def __str__(self):
-        return f"[{self.id}]{self.content}"
+        return f"题目 [{self.question}] 的答案"
 
     class Meta:
         db_table = "answer"

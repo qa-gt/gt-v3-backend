@@ -85,6 +85,5 @@ class GtLog:
         self.get_response = get_response
 
     def __call__(self, request):
-        # print(request.GET.dict(), request.body, request.get_full_path())
         response = self.get_response(request)
         return response

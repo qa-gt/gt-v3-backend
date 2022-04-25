@@ -32,5 +32,6 @@ urlpatterns = [
     path("utils/upload_image", gt_utils.views.UploadImageView.as_view()),
     path("utils/get_music_url", gt_utils.views.get_music_url),
     path("utils/upload_key", gt_utils.views.UploadKeyView.as_view()),
+    path("utils/visit_count", gt_utils.views.visit_count),
     path('admin/', admin.site.urls),
 ]

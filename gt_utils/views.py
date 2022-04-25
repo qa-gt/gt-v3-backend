@@ -1,18 +1,44 @@
 import time
+import datetime
 
 import musicapi
 from django.conf import settings
-from django.http import HttpResponseRedirect
+from django.core.cache import cache
+from django.http import HttpResponseRedirect, JsonResponse
 from gt.permissions import IsAdminOrReadOnly, RequireWeChat
+from rest_framework.permissions import *
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
 from rest_framework.views import APIView
+from rest_framework.viewsets import GenericViewSet, mixins
 
 from gt_utils.serializers import *
-from rest_framework.viewsets import mixins, GenericViewSet
-from rest_framework.permissions import *
 
 from .dogecloud import dogecloud_api
+
+
+def visit_count(request):
+    interval = request.GET.get("interval", "minute")
+    now = request.GET.get("now", int(time.time()))
+    now = datetime.datetime.fromtimestamp(now)
+    if interval == "day":
+        res = cache.get_many([
+            "viscnt_" + (now - datetime.timedelta(days=i)).strftime("%Y-%m-%d")
+            for i in range(7)
+        ])
+    elif interval == "minute":
+        res = cache.get_many([
+            "viscnt_" +
+            (now - datetime.timedelta(minutes=i)).strftime("%Y-%m-%d %H:%M")
+            for i in range(0, 60, 10)
+        ])
+    else:
+        res = cache.get_many([
+            "viscnt_" +
+            (now - datetime.timedelta(hours=i)).strftime("%Y-%m-%d %H")
+            for i in range(7)
+        ])
+    return JsonResponse(res)
 
 
 class UploadImageView(APIView):

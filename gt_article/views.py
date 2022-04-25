@@ -1,22 +1,24 @@
-from gt.permissions import *
-from gt.authentications import *
-from rest_framework.permissions import *
-from rest_framework.decorators import action
-from rest_framework.response import Response
-from rest_framework.viewsets import ModelViewSet, mixins, GenericViewSet
-from django_filters.rest_framework import DjangoFilterBackend
-from rest_framework.filters import SearchFilter, OrderingFilter
-from rest_framework.exceptions import ValidationError
-from django.utils import timezone
-from django.conf import settings
 import datetime
+from random import randint
 
-from gt.permissions import RobotCheck, RequireWeChat
+from django.conf import settings
+from django.utils import timezone
+from django_filters.rest_framework import DjangoFilterBackend
+from gt.authentications import *
+from gt.permissions import *
+from gt.permissions import RequireWeChat, RobotCheck
 from gt_notice.options import add_notice
+from rest_framework.decorators import action
+from rest_framework.exceptions import ValidationError
+from rest_framework.filters import OrderingFilter, SearchFilter
+from rest_framework.permissions import *
+from rest_framework.response import Response
+from rest_framework.viewsets import GenericViewSet, ModelViewSet, mixins
+
+from .filters import *
 from .models import *
 from .permissions import *
 from .serializers import *
-from .filters import *
 
 FORBIDDEN_WORDS_TITLE = ['wzh', '备案']
 
@@ -81,7 +83,6 @@ class ArticleViewSet(ModelViewSet):
 
     @action(methods=['patch'],
             detail=True,
-            authentication_classes=[],
             permission_classes=[],
             url_path='read')
     def add_read_count(self, request, pk=None):
@@ -89,6 +90,17 @@ class ArticleViewSet(ModelViewSet):
         article.read_count += 1
         article.save()
         return Response(status=200)
+
+    @action(methods=['get'],
+            detail=False,
+            url_path='random',
+            permission_classes=[])
+    def get_random_article(self, request):
+        count = request.data.get('len', 10)
+        atcs = Article.objects.filter(state__gt=ArticleStateChoices.HIDE)
+        start = randint(0, max(atcs.count() - count, 0))
+        return Response(
+            SimpleArticleSerializer(atcs[start:start + count], many=True).data)
 
 
 class CommentViewSet(ModelViewSet):
@@ -106,13 +118,6 @@ class CommentViewSet(ModelViewSet):
         return DetailCommentSerializer
 
     def create(self, request, *args, **kwargs):
-        # start_time = timezone.now() - datetime.timedelta(days=1)
-        # comments_count = self.request.user.comment.filter(
-        #     time__gt=start_time).count()
-        # throttle = settings.COMMENT_CREATE_THROTTLE[0 if self.request.user.
-        #                                             wechat else 1]
-        # if comments_count > throttle:
-        #     raise ValidationError('近24小时评论次数已达上限，请进行微信认证以提高限额')
         content = request.data['content']
         author = request.user
         atc_id = request.data['article']
@@ -124,26 +129,30 @@ class CommentViewSet(ModelViewSet):
                                article_id=atc_id,
                                reply=reply,
                                content=content)
+        atc_author = Article.objects.get(id=atc_id).author
         if reply:
-            add_notice(
-                Article.objects.get(id=atc_id).author,
-                f"{author.username}评论了你的文章",
-                f"回复{reply.author.username}的评论：{content}",
-                f"/article/{atc_id}",
-            )
-            add_notice(
-                reply.author,
-                f"{author.username}回复了你的评论",
-                f"回复内容：{content}",
-                f"/article/{atc_id}",
-            )
+            if reply.author != atc_author:
+                add_notice(
+                    atc_author,
+                    f"{author.username}评论了你的文章",
+                    f"回复{reply.author.username}的评论：{content}",
+                    f"/article/{atc_id}",
+                )
+            if reply.author != author:
+                add_notice(
+                    reply.author,
+                    f"{author.username}回复了你的评论",
+                    f"回复内容：{content}",
+                    f"/article/{atc_id}",
+                )
         else:
-            add_notice(
-                Article.objects.get(id=atc_id).author,
-                f"{author.username}评论了你的文章",
-                f"{content}",
-                f"/article/{atc_id}",
-            )
+            if atc_author != author:
+                add_notice(
+                    atc_author,
+                    f"{author.username}评论了你的文章",
+                    f"评论内容：{content}",
+                    f"/article/{atc_id}",
+                )
         return Response(status=201)
 
     def perform_destroy(self, instance):
@@ -177,12 +186,13 @@ class LikeViewSet(ModelViewSet):
                     'detail': '取消成功！'
                 })
             article.like.get_or_create(user=request.user)
-            add_notice(
-                article.author,
-                f"{request.user.username}点赞了你的文章",
-                "",
-                f"/article/{article.id}",
-            )
+            if article.author != request.user:
+                add_notice(
+                    article.author,
+                    f"{request.user.username}点赞了你的文章",
+                    f"文章标题：{article.title}",
+                    f"/article/{article.id}",
+                )
             return Response({
                 'status': 'success',
                 'opt': 'add',
@@ -191,7 +201,11 @@ class LikeViewSet(ModelViewSet):
         elif request.data.get('comment'):
             Like.objects.get_or_create(user=request.user,
                                        comment_id=request.data['comment'])
-        return
+            return Response({
+                'status': 'success',
+                'opt': 'add',
+                'detail': '点赞成功！'
+            })
 
 
 class CollectView(mixins.ListModelMixin, GenericViewSet):

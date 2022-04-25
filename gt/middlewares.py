@@ -1,9 +1,12 @@
-from django.http import JsonResponse, HttpResponse
-from django.conf import settings
+import base64
+import datetime
+from time import time
+
 from Crypto.Cipher import AES
 from Crypto.Util.Padding import unpad
-import base64
-from time import time
+from django.conf import settings
+from django.core.cache import cache
+from django.http import HttpResponse, JsonResponse
 
 
 class CorsMiddleware:
@@ -15,12 +18,7 @@ class CorsMiddleware:
             response = self.get_response(request)
         else:
             response = HttpResponse()
-        response['Access-Control-Allow-Origin'] = '*'
-        response['Access-Control-Allow-Methods'] = '*'
-        response['Access-Control-Allow-Headers'] = '*'
-        response['Access-Control-Allow-Credentials'] = 'true'
-        response['Access-Control-Max-Age'] = '86400'
-        response['Allow'] = '*'
+            response['Allow'] = '*'
         return response
 
 
@@ -85,5 +83,16 @@ class GtLog:
         self.get_response = get_response
 
     def __call__(self, request):
+        if request.method != 'OPTIONS':
+            now = datetime.datetime.now()
+            for key in (
+                    now.strftime('%Y-%m-%d'),
+                    now.strftime('%Y-%m-%d %H'),
+                    now.strftime('%Y-%m-%d %H:') + str(now.minute // 10 * 10),
+            ):
+                try:
+                    cache.incr("viscnt_" + key)
+                except ValueError:
+                    cache.set("viscnt_" + key, 1)
         response = self.get_response(request)
         return response

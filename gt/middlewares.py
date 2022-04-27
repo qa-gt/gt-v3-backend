@@ -87,8 +87,8 @@ class GtLog:
             now = datetime.datetime.now()
             for key in (
                     now.strftime('%Y-%m-%d'),
-                    now.strftime('%Y-%m-%d %H'),
-                    now.strftime('%Y-%m-%d %H:') + str(now.minute // 10 * 10),
+                    now.strftime('%Y-%m-%d_%H'),
+                    now.strftime('%Y-%m-%d_%H:') + str(now.minute // 10 * 10),
             ):
                 try:
                     cache.incr("viscnt_" + key)

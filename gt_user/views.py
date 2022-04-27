@@ -180,20 +180,19 @@ class UserViewSet(ModelViewSet):
                 {
                     'secretKey': settings.VICY_SECRET
                 }).json()['data']
+            cache.set(f'wechat-{request.user.id}', r['tempUserId'], 10 * 60)
             return Response({
                 'status': 'success',
                 'data': {
                     'qrCode': r['qrCodeReturnUrl'],
-                    'tempUserId': r['tempUserId']
                 }
             })
-        temp_uid = request.query_params.get('tempUID')
+        temp_uid = cache.get(f'wechat-{request.user.id}')
         cache_key = f'wechat-{temp_uid}'
         unique_id = cache.get(cache_key)
         if unique_id is None:
             return Response({'status': 'success', 'detail': 'pending'})
-        wechat_data, created = WeChat.objects.get_or_create(
-            unique_id=unique_id)
+        wechat_data = WeChat.objects.get_or_create(unique_id=unique_id)
         request.user.wechat = wechat_data
         request.user.save()
         cache.delete(cache_key)

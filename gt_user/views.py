@@ -22,8 +22,6 @@ from .permissions import *
 from .serializers import *
 from .yunxiao import yx_login
 
-FORBIDDEN_WORDS = ['机器人', 'test']
-
 
 class LoginView(APIView):
     authentication_classes = []
@@ -68,11 +66,6 @@ class RegisterView(APIView):
             return Response({'status': 'error', 'detail': '当日只能注册账号数已达上限！'})
         if User.objects.filter(username=username).exists():
             return Response({'status': 'error', 'detail': '该用户名已被注册！'})
-        if any(i in username for i in FORBIDDEN_WORDS):
-            raise AuthenticationFailed({
-                'status': 'error',
-                'detail': '您未能通过人机验证！'
-            })
         user = User.objects.create_user(username=username, password=password)
         cache.set(cache_key, register_count + 1, 24 * 3600)
         return Response({

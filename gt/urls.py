@@ -3,6 +3,7 @@ import gt_article.views
 import gt_utils.views
 import gt_notice.views
 import gt_form.views
+import gt_school.views
 from django.contrib import admin
 from django.urls import include, path, re_path
 from rest_framework.routers import DefaultRouter
@@ -22,6 +23,7 @@ router.register(r'form_response',
                 gt_form.views.ResponseView,
                 basename='form_response')
 router.register('about', gt_utils.views.AboutView)
+router.register('calendar_event', gt_school.views.CalendarEventViewSet)
 
 urlpatterns = [
     re_path(r'^', include(router.urls)),

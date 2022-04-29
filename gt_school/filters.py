@@ -3,10 +3,13 @@ from django_filters import rest_framework as filters
 
 
 class CalendarEventFilter(filters.FilterSet):
-    min_state = filters.NumberFilter(field_name="state", lookup_expr='gte')
+    start_time = filters.DateTimeFilter(field_name="start",
+                                        lookup_expr='gte',
+                                        required=True)
+    end_time = filters.DateTimeFilter(field_name="start",
+                                      lookup_expr='lte',
+                                      required=True)
 
     class Meta:
         model = CalendarEvent
-        fields = {
-            'start': ['gte', 'lte', 'range'],
-        }
+        fields = {}

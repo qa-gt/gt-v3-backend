@@ -1,29 +1,39 @@
 from turtle import title
-from django.db import models
 
+from django.db import models
 from gt_user.models import User
 
-# Create your models here.
-
 NUM_TO_LETTER = list(' ABCDEFGHIJKLMNOPQRSTUVWXYZ')
+
+
+class PermissionChoices(models.IntegerChoices):
+    EVERYONE = 0, '所有人'
+    LOGIN = 1, '登录用户'
+    WECHAT = 2, '微信认证用户'
 
 
 class QuestionTypeChoices(models.IntegerChoices):
     RADIO = 1, '单选题'
     SELECT = 2, '多选题'
+    BLANK = 3, '填空题'
 
 
 class Form(models.Model):
     title = models.CharField(max_length=200, verbose_name='标题')
+    description = models.TextField(null=True, blank=True, verbose_name='描述')
     creator = models.ForeignKey(User,
                                 on_delete=models.CASCADE,
                                 related_name='form',
                                 verbose_name='创建者')
     create_time = models.DateTimeField(auto_now_add=True, verbose_name='创建时间')
-    end_time = models.DateTimeField(verbose_name='截止时间',
-                                    null=True,
-                                    blank=True,
-                                    default=None)
+    start_time = models.DateTimeField(verbose_name='开始时间',
+                                      null=True,
+                                      blank=True)
+    end_time = models.DateTimeField(verbose_name='截止时间', null=True, blank=True)
+    permission = models.SmallIntegerField(choices=PermissionChoices.choices,
+                                          default=PermissionChoices.LOGIN,
+                                          verbose_name='提交权限')
+    anonymous = models.BooleanField(default=True, verbose_name='匿名提交')
 
     def __str__(self):
         return f"[{self.id}]{self.title}"
@@ -43,6 +53,7 @@ class Question(models.Model):
         related_name='question',
         verbose_name='所属表单',
     )
+    required = models.BooleanField(default=True, verbose_name='必填')
 
     def __str__(self):
         return f"[{self.id}]{self.title}"
@@ -97,7 +108,10 @@ class Answer(models.Model):
                                  verbose_name='所属填写')
     choice = models.ForeignKey(QuestionChoice,
                                on_delete=models.CASCADE,
-                               verbose_name='选项')
+                               verbose_name='选项答案',
+                               blank=True,
+                               null=True)
+    text = models.TextField(verbose_name='填空答案', blank=True, null=True)
 
     def __str__(self):
         return f"题目 [{self.question}] 的答案"

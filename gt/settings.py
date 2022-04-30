@@ -10,9 +10,9 @@ For the full list of settings and their values, see
 https://docs.djangoproject.com/en/4.0/ref/settings/
 """
 
-from pathlib import Path
-import os
 import datetime
+import os
+from pathlib import Path
 
 GT_SERVER = os.environ.get('GTSERVER', "DEVELOPMENT")
 GT_POSTGRESQL = {

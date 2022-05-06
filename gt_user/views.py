@@ -185,8 +185,8 @@ class UserViewSet(ModelViewSet):
         unique_id = cache.get(cache_key)
         if unique_id is None:
             return Response({'status': 'success', 'detail': 'pending'})
-        wechat_data = WeChat.objects.get_or_create(unique_id=unique_id)
-        request.user.wechat = wechat_data
+        WeChat.objects.get_or_create(unique_id=unique_id)
+        request.user.wechat = WeChat.objects.get(unique_id=unique_id)
         request.user.save()
         cache.delete(cache_key)
         return Response({

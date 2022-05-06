@@ -62,6 +62,7 @@ INSTALLED_APPS = [
     'gt_utils.apps.GtUtilsConfig',
     'gt_form.apps.GtFormConfig',
     'gt_school.apps.GtSchoolConfig',
+    'gt_tape.apps.GtTapeConfig',
 ]
 
 MIDDLEWARE = [

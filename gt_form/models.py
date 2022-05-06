@@ -1,5 +1,3 @@
-from turtle import title
-
 from django.db import models
 from gt_user.models import User
 

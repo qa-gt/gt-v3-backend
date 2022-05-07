@@ -31,10 +31,13 @@ class TapeQuestion(models.Model):
 
 
 class TapeReply(models.Model):
-    author = models.ForeignKey(User,
-                               on_delete=models.SET_NULL,
-                               verbose_name='提问者',
-                               blank=True,
-                               null=True)
+    question = models.ForeignKey(TapeQuestion,
+                                 on_delete=models.CASCADE,
+                                 related_name='reply',
+                                 verbose_name='问题')
+    is_owner = models.BooleanField(default=False, verbose_name='是否是所有者')
     content = models.CharField(max_length=500, verbose_name='内容')
     time = models.DateTimeField(auto_now_add=True, verbose_name='回复时间')
+
+    class Meta:
+        ordering = ['-time']

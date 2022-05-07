@@ -1,12 +1,9 @@
 import datetime
 from random import randint
 
-from django.conf import settings
 from django.utils import timezone
 from django_filters.rest_framework import DjangoFilterBackend
-from gt.authentications import *
 from gt.permissions import *
-from gt.permissions import RequireWeChat, RobotCheck
 from gt_notice.options import add_notice
 from rest_framework.decorators import action
 from rest_framework.exceptions import ValidationError
@@ -16,9 +13,9 @@ from rest_framework.response import Response
 from rest_framework.viewsets import GenericViewSet, ModelViewSet, mixins
 
 from .filters import *
-from .models import *
 from .permissions import *
 from .serializers import *
+from .models import *
 
 
 class TopicViewSet(ModelViewSet):
@@ -38,7 +35,7 @@ class ArticleViewSet(ModelViewSet):
     ]
     filter_backends = [DjangoFilterBackend, SearchFilter, OrderingFilter]
     filterset_class = ArticleFilter
-    search_fields = ['title', 'content']
+    search_fields = ['title', 'content', 'author__username']
     ordering_fields = ['state', 'create_time', 'id']
 
     def get_serializer_class(self):
@@ -51,7 +48,7 @@ class ArticleViewSet(ModelViewSet):
         articles_count = self.request.user.article.filter(
             create_time__gt=start_time).count()
         throttle = settings.ARTICLE_CREATE_THROTTLE[0 if self.request.user.
-                                                    wechat else 1]
+            wechat else 1]
         if articles_count > throttle:
             raise ValidationError({
                 'status': 'error',

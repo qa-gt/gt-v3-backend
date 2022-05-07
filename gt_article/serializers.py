@@ -1,8 +1,7 @@
-from email.policy import default
-from rest_framework import serializers
 from .models import *
 
 from gt_user.serializers import *
+from rest_framework import serializers
 
 
 class Collected(serializers.ReadOnlyField):
@@ -64,7 +63,7 @@ class CommentSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = Comment
-        exclude = ('article', )
+        exclude = ('article',)
 
 
 class DetailCommentSerializer(serializers.ModelSerializer):
@@ -83,7 +82,7 @@ class LikeSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = Like
-        fields = ('user', )
+        fields = ('user',)
 
 
 class DetailLikeSerializer(serializers.ModelSerializer):
@@ -102,5 +101,5 @@ class CollectSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = Collect
-        fields = ('article', )
+        fields = ('article',)
         read_only_fields = ('id', 'user')

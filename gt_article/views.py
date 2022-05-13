@@ -36,7 +36,7 @@ class ArticleViewSet(ModelViewSet):
     filter_backends = [DjangoFilterBackend, SearchFilter, OrderingFilter]
     filterset_class = ArticleFilter
     search_fields = ['title', 'content', 'author__username']
-    ordering_fields = ['state', 'create_time', 'id']
+    ordering_fields = ['state', 'create_time', 'update_time', 'id']
 
     def get_serializer_class(self):
         if self.action == 'list':
@@ -48,7 +48,7 @@ class ArticleViewSet(ModelViewSet):
         articles_count = self.request.user.article.filter(
             create_time__gt=start_time).count()
         throttle = settings.ARTICLE_CREATE_THROTTLE[0 if self.request.user.
-            wechat else 1]
+                                                    wechat else 1]
         if articles_count > throttle:
             raise ValidationError({
                 'status': 'error',
@@ -199,6 +199,7 @@ class CollectView(mixins.ListModelMixin, GenericViewSet):
     filter_backends = [DjangoFilterBackend, SearchFilter]
     filterset_class = CollectFilter
     search_fields = ['article__title', 'article__content']
+    ordering_fields = ['article__state', 'create_time', 'update_time', 'article__id']
 
     def create(self, request, *args, **kwargs):
         article = Article.objects.filter(id=request.data['article'])

@@ -79,7 +79,9 @@ class TapeReplyViewSet(GenericViewSet):
         try:
             question = TapeQuestion.objects.get(id=request.data['question'])
             if request.data['token'] != question.token and (
-                    not request.user or request.user != question.author):
+                    not request.user or
+                (request.user != question.author
+                 and request.user != question.box.user)):
                 raise AuthenticationFailed('提问者身份验证失败')
             reply = TapeReply(question=question,
                               content=request.data['content'],

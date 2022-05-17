@@ -65,7 +65,7 @@ class TapeQuestionViewSet(mixins.ListModelMixin, GenericViewSet):
             add_notice(tape_box.user, "您的TapeBox有新的问题",
                        request.data['content'],
                        "/tapebox/" + request.data['box'])
-            return Response(TapeQuestionSerializer(question).data, 201)
+            return Response(TapeQuestionCreatingSerializer(question).data, 201)
         except TapeBox.DoesNotExist:
             raise ValidationError('问题创建失败')
 

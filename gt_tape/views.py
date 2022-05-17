@@ -90,7 +90,7 @@ class TapeReplyViewSet(GenericViewSet):
             if reply.is_owner and question.author:
                 add_notice(question.author, "您的Tape提问有新的回复",
                            request.data['content'],
-                           "/tapebox/" + str(question.id))
+                           "/tapebox/" + str(question.box.id))
             return Response(status=201)
         except TapeQuestion.DoesNotExist:
             raise ValidationError('回复失败')

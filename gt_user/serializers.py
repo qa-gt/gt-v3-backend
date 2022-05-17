@@ -20,6 +20,17 @@ class YunxiaoField(serializers.ReadOnlyField):
             return f'{value.real_name}({value.student_id[:4]}****)'
         return ''
 
+
+class TapeBoxField(serializers.ReadOnlyField):
+    def to_internal_value(self, data):
+        pass
+
+    def to_representation(self, value):
+        if value.exists():
+            return value.first().id
+        return None
+
+
 class WeChatField(serializers.ReadOnlyField):
     def to_internal_value(self, data):
         pass
@@ -38,13 +49,13 @@ class SimpleUserSerializer(serializers.ModelSerializer):
 class UserSerializer(serializers.ModelSerializer):
     yunxiao = YunxiaoField()
     followed = Followed(source="follower")
+    tape_box = TapeBoxField()
 
     class Meta:
         model = User
-        fields = ('id', 'username', 'tags', 'grade', 'gender', 'portrait',
-                  'yunxiao', 'introduction', 'followed')
-        read_only_fields = ('id', 'username', 'tags', 'grade', 'gender',
-                            'portrait', 'yunxiao', 'introduction')
+        fields = read_only_fields = ('id', 'username', 'tags', 'grade',
+                                     'gender', 'portrait', 'yunxiao',
+                                     'introduction', 'followed', 'tape_box')
 
 
 class DetailUserSerializer(serializers.ModelSerializer):

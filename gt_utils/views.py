@@ -69,7 +69,7 @@ class UploadKeyView(APIView):
 
     @staticmethod
     def post(request):
-        scope = f"atc_images/{request.ip}/{request.user.id}/*"
+        scope = f"atc_images/{request.user.id}/*"
         r = dogecloud_api(
             "/auth/tmp_token.json", {
                 "channel": "OSS_UPLOAD",

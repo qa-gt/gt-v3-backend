@@ -1,5 +1,5 @@
 import requests
-from .models import *
+# from .models import *
 
 PARTNER = 'qdzx'
 LOGIN_URL = f'https://{PARTNER}.yunxiao.com/accountApi/userLogin'
@@ -37,25 +37,26 @@ def yx_login(username, password, captcha_code='', captcha_value=''):
     if len(user_info['roles']) != 1:
         return {'status': 'error', 'msg': '该账号无身份信息或身份信息不唯一'}
 
-    gender = GenderChoices.SECRET
-    role = ''
-    role_data = user_info['roles'][0]
-    if user_info['gender'] == '男':
-        gender = GenderChoices.MALE
-    elif user_info['gender'] == '女':
-        gender = GenderChoices.FEMALE
-    if role_data['roleName'] == '学生':
-        role = YxRoleChoices.STUDENT
-    elif role_data['roleName'] == '老师':
-        role = YxRoleChoices.TEACHER
-    user_data = {
-        'real_name': user_info['userName'],
-        'mobile': user_info['mobile'],
-        'gender': gender,
-        'role': role,
-        'user_id': role_data['idspData']['userId']
-    }
-    return {'status': 'success', 'data': user_data}
+    # gender = GenderChoices.SECRET
+    # role = ''
+    # role_data = user_info['roles'][0]
+    # if user_info['gender'] == '男':
+    #     gender = GenderChoices.MALE
+    # elif user_info['gender'] == '女':
+    #     gender = GenderChoices.FEMALE
+    # if role_data['roleName'] == '学生':
+    #     role = YxRoleChoices.STUDENT
+    # elif role_data['roleName'] == '老师':
+    #     role = YxRoleChoices.TEACHER
+    # user_data = {
+    #     'real_name': user_info['userName'],
+    #     'mobile': user_info['mobile'],
+    #     'gender': gender,
+    #     'role': role,
+    #     'user_id': role_data['idspData']['userId']
+    # }
+    # return {'status': 'success', 'data': user_data}
+    return user_info
 
 
 def get_captcha_url(captcha_code):

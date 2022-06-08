@@ -90,8 +90,11 @@ class ArticleViewSet(ModelViewSet):
 class CommentViewSet(ModelViewSet):
     queryset = Comment.objects.filter(state__gte=0).order_by('id')
     permission_classes = [
-        IsAuthenticatedOrReadOnly, NoEdit, CommentPermission, RobotCheck,
-        RequireWeChat
+        IsAuthenticatedOrReadOnly,
+        NoEdit,
+        CommentPermission,
+        RobotCheck,
+        # RequireWeChat
     ]
     filter_backends = [DjangoFilterBackend]
     filterset_class = CommentFilter
@@ -199,7 +202,9 @@ class CollectView(mixins.ListModelMixin, GenericViewSet):
     filter_backends = [DjangoFilterBackend, SearchFilter]
     filterset_class = CollectFilter
     search_fields = ['article__title', 'article__content']
-    ordering_fields = ['article__state', 'create_time', 'update_time', 'article__id']
+    ordering_fields = [
+        'article__state', 'create_time', 'update_time', 'article__id'
+    ]
 
     def create(self, request, *args, **kwargs):
         article = Article.objects.filter(id=request.data['article'])

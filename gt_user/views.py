@@ -92,7 +92,6 @@ class OAuthCallbackView(APIView):
 
     @staticmethod
     def post(request):
-        print(request.data)
         if request.data.get('server') not in ['ctf']:
             raise AuthenticationFailed({
                 'status': 'forbidden',

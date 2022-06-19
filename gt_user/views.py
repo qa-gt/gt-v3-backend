@@ -1,9 +1,11 @@
+import uuid
+
 from django.utils import timezone
 from django.contrib.auth import authenticate
 from django.conf import settings
 from django.core.cache import cache
 from gt import jencode
-from rest_framework.exceptions import AuthenticationFailed
+from rest_framework.exceptions import AuthenticationFailed, ValidationError
 from rest_framework.response import Response
 from rest_framework.decorators import action
 from rest_framework.views import APIView
@@ -48,6 +50,64 @@ class LoginView(APIView):
             'status': 'success',
             'detail': '登录成功',
             'token': jencode({'id': user.id}),
+            'user': DetailUserSerializer(user).data
+        })
+
+
+class OAuthLoginView(APIView):
+    authentication_classes = []
+    permission_classes = []
+
+    @staticmethod
+    def post(request):
+        username = request.data.get('username')
+        password = request.data.get('password')
+        user = authenticate(username=username, password=password)
+        if not user:
+            raise AuthenticationFailed({
+                'status': 'forbidden',
+                'detail': '用户名或密码错误'
+            })
+        if (not user.is_active) or (user.wechat and not user.wechat.is_active):
+            raise AuthenticationFailed({
+                'status': 'forbidden',
+                'detail': '用户被封禁'
+            })
+        user.last_login = timezone.now()
+        user.save()
+        token = str(
+            uuid.uuid5(uuid.NAMESPACE_DNS, f"{user.id}:{user.last_login}"))
+        cache_key = "oauth-" + str(token)
+        cache.set(cache_key, user.id, 600)
+        return Response({
+            'status': 'success',
+            'detail': '登录成功',
+            'token': token
+        })
+
+
+class OAuthCallbackView(APIView):
+    authentication_classes = []
+    permission_classes = []
+
+    @staticmethod
+    def post(request):
+        print(request.data)
+        if request.data.get('server') not in ['ctf']:
+            raise AuthenticationFailed({
+                'status': 'forbidden',
+                'detail': '非法请求'
+            })
+        token = request.data.get('token')
+        cache_key = "oauth-" + str(token)
+        user_id = cache.get(cache_key)
+        user = User.objects.filter(id=user_id)
+        if not token or not user_id or not user.exists():
+            raise ValidationError({'status': 'fail', 'detail': 'token错误或已过期'})
+        user = user.first()
+        return Response({
+            'status': 'success',
+            'detail': '登录成功',
             'user': DetailUserSerializer(user).data
         })
 

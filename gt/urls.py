@@ -32,6 +32,8 @@ router.register('tape_reply', gt_tape.views.TapeReplyViewSet)
 urlpatterns = [
     re_path(r'^', include(router.urls)),
     path("user/login", gt_user.views.LoginView.as_view()),
+    path("user/oauth_login", gt_user.views.OAuthLoginView.as_view()),
+    path("user/oauth_callback", gt_user.views.OAuthCallbackView.as_view()),
     path("user/register", gt_user.views.RegisterView.as_view()),
     re_path(r'^api-auth/',
             include('rest_framework.urls', namespace='rest_framework')),

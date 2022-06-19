@@ -28,8 +28,8 @@ class GtCheck:
 
     def __call__(self, request):
         is_exception = any(
-            request.path.startswith(i)
-            for i in ['/admin/', '/user/wechat_update/'])
+            request.path.startswith(i) for i in
+            ['/admin/', '/user/wechat_update/', '/user/oauth_callback'])
         if not is_exception:
             # Check UA
             if not request.headers.get('User-Agent') or not any(

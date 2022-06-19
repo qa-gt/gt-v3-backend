@@ -10,6 +10,8 @@ def jencode(payload):
     jwt_data = jwt.encode(payload=payload,
                           key=settings.SECRET_KEY,
                           algorithm='HS256')
+    if type(jwt_data) is bytes:
+        jwt_data = jwt_data.decode('utf-8')
     return f'{settings.JWT_PREFIX} {jwt_data}'
 
 

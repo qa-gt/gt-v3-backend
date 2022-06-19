@@ -36,7 +36,7 @@ class WeChatField(serializers.ReadOnlyField):
         pass
 
     def to_representation(self, value):
-        return f"{value.unique_id[:4]}****"
+        return value.unique_id if value else None
 
 
 class SimpleUserSerializer(serializers.ModelSerializer):

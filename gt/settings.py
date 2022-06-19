@@ -67,13 +67,13 @@ INSTALLED_APPS = [
 
 MIDDLEWARE = [
     'gt.middlewares.GtCheck',
-    'gt.middlewares.GtLog',
     'django.middleware.security.SecurityMiddleware',
     'django.contrib.sessions.middleware.SessionMiddleware',
     'django.middleware.common.CommonMiddleware',
     'django.contrib.auth.middleware.AuthenticationMiddleware',
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
+    'gt.middlewares.GtLog',
 ]
 
 ROOT_URLCONF = 'gt.urls'

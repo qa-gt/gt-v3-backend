@@ -118,7 +118,7 @@ class CommentViewSet(ModelViewSet):
                                content=content)
         atc_author = Article.objects.get(id=atc_id).author
         if reply:
-            if reply.author != atc_author:
+            if reply.author != atc_author and author != atc_author:
                 add_notice(
                     atc_author,
                     f"{author.username}评论了你的文章",

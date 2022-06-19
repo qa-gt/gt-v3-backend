@@ -21,28 +21,31 @@ class NoEdit(BasePermission):
 
 class RobotCheck(BasePermission):
     def has_permission(self, request, view):
-        if request.method in SAFE_METHODS:
+        if request.method in SAFE_METHODS or request.method == 'DELETE':
             return True
         token = request.data.get('recaptcha')
-        if token:
-            r = post(
-                "https://recaptcha.google.cn/recaptcha/api/siteverify", {
-                    'response': token,
-                    'ip': request.ip,
-                    'secret': settings.RECAPTCHA_SECRET,
-                }).json()
-            if not r['success']:
-                raise AuthenticationFailed({
-                    'status': 'error',
-                    'detail': '人机验证出错, 请重试'
-                })
-            elif r['score'] < 0.6:
-                raise AuthenticationFailed({
-                    'status': 'error',
-                    'detail': '您未能通过人机验证！'
-                })
-            else:
-                return True
+        if not token:
+            raise AuthenticationFailed({
+                'status': 'error',
+                'detail': '未找到人机验证信息'
+            })
+        r = post(
+            "https://recaptcha.google.cn/recaptcha/api/siteverify", {
+                'response': token,
+                'ip': request.ip,
+                'secret': settings.RECAPTCHA_SECRET,
+            }).json()
+        if not r['success']:
+            raise AuthenticationFailed({
+                'status': 'error',
+                'detail': '人机验证出错, 请重试'
+            })
+        elif r['score'] < 0.6:
+            raise AuthenticationFailed({
+                'status': 'error',
+                'detail': '您未能通过人机验证！'
+            })
+        return True
 
 
 class RequireWeChat(BasePermission):

@@ -78,7 +78,7 @@ class OAuthLoginView(APIView):
         token = str(
             uuid.uuid5(uuid.NAMESPACE_DNS, f"{user.id}:{user.last_login}"))
         cache_key = "oauth-" + str(token)
-        cache.set(cache_key, user.id, 600)
+        cache.set(cache_key, user.id, 30)
         return Response({
             'status': 'success',
             'detail': '登录成功',
@@ -105,6 +105,7 @@ class OAuthCallbackView(APIView):
         if not token or not user_id or not user.exists():
             raise ValidationError({'status': 'fail', 'detail': 'token错误或已过期'})
         user = user.first()
+        cache.delete(cache_key)
         return Response({
             'status': 'success',
             'detail': '登录成功',

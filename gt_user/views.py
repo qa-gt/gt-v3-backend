@@ -1,23 +1,22 @@
 import uuid
 
-from django.utils import timezone
-from django.contrib.auth import authenticate
 from django.conf import settings
+from django.contrib.auth import authenticate
 from django.core.cache import cache
-from gt import jencode
-from rest_framework.exceptions import AuthenticationFailed, ValidationError
-from rest_framework.response import Response
-from rest_framework.decorators import action
-from rest_framework.views import APIView
-from rest_framework.viewsets import ModelViewSet, ReadOnlyModelViewSet
-from rest_framework.permissions import *
+from django.utils import timezone
 from django_filters.rest_framework import DjangoFilterBackend
-from rest_framework.filters import SearchFilter
-from rest_framework.parsers import FormParser
-from requests import get
-
+from gt import jencode
 from gt.permissions import RobotCheck
 from gt_notice.options import add_notice
+from requests import get
+from rest_framework.decorators import action
+from rest_framework.exceptions import AuthenticationFailed, ValidationError
+from rest_framework.filters import SearchFilter
+from rest_framework.parsers import FormParser
+from rest_framework.permissions import IsAuthenticated, IsAuthenticatedOrReadOnly
+from rest_framework.response import Response
+from rest_framework.views import APIView
+from rest_framework.viewsets import ModelViewSet, ReadOnlyModelViewSet
 
 from .models import *
 from .permissions import *
@@ -51,6 +50,27 @@ class LoginView(APIView):
             'detail': '登录成功',
             'token': jencode({'id': user.id}),
             'user': DetailUserSerializer(user).data
+        })
+
+
+class ChangePasswordView(APIView):
+    permission_classes = [IsAuthenticated]
+
+    @staticmethod
+    def post(request):
+        old_password = request.data.get('old_password')
+        new_password = request.data.get('new_password')
+        user = request.user
+        if not user.check_password(old_password):
+            raise AuthenticationFailed({
+                'status': 'forbidden',
+                'detail': '旧密码错误'
+            })
+        user.set_password(new_password)
+        user.save()
+        return Response({
+            'status': 'success',
+            'detail': '密码修改成功',
         })
 
 

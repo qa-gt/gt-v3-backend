@@ -65,7 +65,6 @@ class GtCheck:
                     request.META['CONTENT_TYPE'] = 'application/json'
                     setattr(request, '_body', data)
                 except ValueError as e:
-                    raise e
                     return JsonResponse({
                         'status': 'error',
                         'detail': '非法请求'

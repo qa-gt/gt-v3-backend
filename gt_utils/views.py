@@ -1,11 +1,13 @@
-import time
 import datetime
+import hashlib
+import random
+import time
 
 import musicapi
 from django.conf import settings
 from django.core.cache import cache
 from django.http import HttpResponseRedirect, JsonResponse
-from gt.permissions import IsAdminOrReadOnly, RequireWeChat
+from gt.permissions import IsAdminOrReadOnly, RequireWeChat, RobotCheck
 from rest_framework.permissions import *
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
@@ -15,6 +17,13 @@ from rest_framework.viewsets import GenericViewSet, mixins
 from gt_utils.serializers import *
 
 from .dogecloud import dogecloud_api
+
+
+def md5sum(src):
+    src = src.encode("utf-8")
+    m = hashlib.md5()
+    m.update(src)
+    return m.hexdigest()
 
 
 def visit_count(request):
@@ -103,3 +112,27 @@ def get_music_url(request):
         elif request.GET["by"] == "NAME":
             url = musicapi.wyy.get_by_name(request.GET["value"])
     return HttpResponseRedirect(url)
+
+
+class LiveKeyView(APIView):
+    permission_classes = [IsAuthenticated, IsAdminOrReadOnly, RobotCheck]
+
+    @staticmethod
+    def get(request):
+        path = request.GET['path']
+        timestamp = int(time.time())
+        rand = str(random.random()).replace('.', '')
+        sstring = f'{path}-{timestamp}-{rand}-0-{settings.ALI_LIVE_PULL_KEY}'
+        hashvalue = md5sum(sstring)
+        auth_key = f'{timestamp}-{rand}-0-{hashvalue}'
+        return Response({'status': 'success', 'auth_key': auth_key})
+
+    @staticmethod
+    def post(request):
+        path = request.data['path']
+        timestamp = int(time.time())
+        rand = str(random.random()).replace('.', '')
+        sstring = f'{path}-{timestamp}-{rand}-0-{settings.ALI_LIVE_PUSH_KEY}'
+        hashvalue = md5sum(sstring)
+        auth_key = f'{timestamp}-{rand}-0-{hashvalue}'
+        return Response({'status': 'success', 'auth_key': auth_key})

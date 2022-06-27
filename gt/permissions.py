@@ -21,9 +21,10 @@ class NoEdit(BasePermission):
 
 class RobotCheck(BasePermission):
     def has_permission(self, request, view):
-        if request.method in SAFE_METHODS or request.method == 'DELETE':
+        if request.method in SAFE_METHODS or request.method == 'DELETE' or (
+                request.user and request.user.is_staff):
             return True
-        token = request.data.get('recaptcha')
+        token = request.data.get('recaptcha') or request.GET.get('recaptcha')
         if not token:
             raise AuthenticationFailed({
                 'status': 'error',

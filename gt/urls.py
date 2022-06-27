@@ -42,5 +42,6 @@ urlpatterns = [
     path("utils/get_music_url", gt_utils.views.get_music_url),
     path("utils/upload_key", gt_utils.views.UploadKeyView.as_view()),
     path("utils/visit_count", gt_utils.views.visit_count),
+    path("utils/live_key", gt_utils.views.LiveKeyView.as_view()),
     path('admin/', admin.site.urls),
 ]

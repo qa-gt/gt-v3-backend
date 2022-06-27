@@ -47,6 +47,7 @@ class GtCheck:
                     'PATCH') and request.GET.get("ssssign") != 'disable':
                 try:
                     raw_data = base64.b64decode(request.body)
+                    print(raw_data)
                     cryptor = AES.new(settings.WEBGUARD_KEY, AES.MODE_CBC,
                                       settings.WEBGUARD_IV)
                     decrypted_data = cryptor.decrypt(raw_data)
@@ -63,7 +64,8 @@ class GtCheck:
                             status=403)
                     request.META['CONTENT_TYPE'] = 'application/json'
                     setattr(request, '_body', data)
-                except ValueError:
+                except ValueError as e:
+                    raise e
                     return JsonResponse({
                         'status': 'error',
                         'detail': '非法请求'

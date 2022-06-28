@@ -15,7 +15,7 @@ from rest_framework.views import APIView
 from rest_framework.viewsets import GenericViewSet, mixins
 
 from gt_utils.serializers import *
-
+from .serializers import LiveInfoSerializer
 from .dogecloud import dogecloud_api
 
 
@@ -136,3 +136,13 @@ class LiveKeyView(APIView):
         hashvalue = md5sum(sstring)
         auth_key = f'{timestamp}-{rand}-0-{hashvalue}'
         return Response({'status': 'success', 'auth_key': auth_key})
+
+
+def get_live_info(request):
+    return JsonResponse({
+        'status':
+        'success',
+        'data':
+        LiveInfoSerializer(
+            LiveInfo.objects.filter(show=True).order_by('-id').first()).data
+    })

@@ -16,9 +16,11 @@ class About(models.Model):
 
 class LiveInfo(models.Model):
     time = models.DateTimeField(verbose_name="时间")
+    end_time = models.DateTimeField(verbose_name="结束时间")
     title = models.CharField(max_length=100, verbose_name="标题")
     description = models.CharField(max_length=500, verbose_name="描述")
     show = models.BooleanField(default=False, verbose_name="是否显示")
+    watched = models.IntegerField(default=0, verbose_name="观看人数")
 
     class Meta:
         verbose_name = verbose_name_plural = "直播间信息"

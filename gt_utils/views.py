@@ -7,6 +7,7 @@ import musicapi
 from django.conf import settings
 from django.core.cache import cache
 from django.http import HttpResponseRedirect, JsonResponse
+from django.utils import timezone
 from gt.permissions import IsAdminOrReadOnly, RequireWeChat, RobotCheck
 from rest_framework.permissions import *
 from rest_framework.permissions import IsAuthenticated
@@ -139,10 +140,14 @@ class LiveKeyView(APIView):
 
 
 def get_live_info(request):
+    live = LiveInfo.objects.filter(show=True).order_by('-id').first()
+    start_time = timezone.localtime(live.time).replace(tzinfo=None)
+    end_time = timezone.localtime(live.end_time).replace(tzinfo=None)
+    now = datetime.datetime.now()
+    if (start_time - now).total_seconds() < 900 and now < end_time:
+        live.watched += 1
+        live.save()
     return JsonResponse({
-        'status':
-        'success',
-        'data':
-        LiveInfoSerializer(
-            LiveInfo.objects.filter(show=True).order_by('-id').first()).data
+        'status': 'success',
+        'data': LiveInfoSerializer(live).data
     })

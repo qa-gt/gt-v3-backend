@@ -1,5 +1,6 @@
 __pycache__
 migrations
+static_root
 .idea
 .vscode
 *.sqlite3

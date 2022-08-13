@@ -4,3 +4,4 @@ migrations
 .vscode
 *.sqlite3
 article_images
+*.env

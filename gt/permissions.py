@@ -5,6 +5,7 @@ from rest_framework.permissions import SAFE_METHODS, BasePermission
 
 
 class IsAdminOrReadOnly(BasePermission):
+
     def has_permission(self, request, view):
         if request.method in SAFE_METHODS:
             return True
@@ -12,6 +13,7 @@ class IsAdminOrReadOnly(BasePermission):
 
 
 class NoEdit(BasePermission):
+
     def has_permission(self, request, view):
         if request.method in SAFE_METHODS or request.method in [
                 'POST', 'DELETE'
@@ -20,10 +22,28 @@ class NoEdit(BasePermission):
 
 
 class RobotCheck(BasePermission):
+
     def has_permission(self, request, view):
         if request.method in SAFE_METHODS or request.method == 'DELETE' or (
                 request.user and request.user.is_staff):
             return True
+
+        # HCCAPTCHA
+        request_id, verificate_code = request.data.get(
+            'requestId'), request.data.get('verificateCode')
+        if request_id and verificate_code:
+            r = post('https://captcha.qdzx.icu/check', {
+                'request_id': request_id,
+                'verificate_code': verificate_code
+            }).json()
+            if r['status'] == 'success':
+                return True
+            raise AuthenticationFailed({
+                'status': 'error',
+                'detail': '您未能通过人机验证！'
+            })
+
+        # RECAPTCHA
         token = request.data.get('recaptcha') or request.GET.get('recaptcha')
         if not token:
             raise AuthenticationFailed({
@@ -50,6 +70,7 @@ class RobotCheck(BasePermission):
 
 
 class RequireWeChat(BasePermission):
+
     def has_permission(self, request, view):
         if request.method in SAFE_METHODS:
             return True

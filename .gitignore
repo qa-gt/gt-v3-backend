@@ -6,3 +6,4 @@ static_root
 *.sqlite3
 article_images
 *.env
+venv/

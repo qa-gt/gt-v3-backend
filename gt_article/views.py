@@ -31,7 +31,8 @@ class ArticleViewSet(ModelViewSet):
     queryset = Article.objects.filter(
         state__gt=ArticleStateChoices.HIDE).order_by('-id')
     permission_classes = [
-        IsAuthenticatedOrReadOnly, ArticlePermission, RobotCheck, RequireWeChat
+        IsAuthenticatedOrReadOnly, ArticlePermission, RobotCheck,
+        # RequireWeChat
     ]
     filter_backends = [DjangoFilterBackend, SearchFilter, OrderingFilter]
     filterset_class = ArticleFilter

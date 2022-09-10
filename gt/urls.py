@@ -2,7 +2,6 @@ import gt_user.views
 import gt_article.views
 import gt_utils.views
 import gt_notice.views
-import gt_form.views
 import gt_school.views
 import gt_tape.views
 from django.contrib import admin
@@ -19,10 +18,6 @@ router.register(r'comment', gt_article.views.CommentViewSet)
 router.register(r'collect', gt_article.views.CollectView)
 router.register(r'follow', gt_user.views.FollowView)
 router.register(r'notice', gt_notice.views.NoticeView, basename='notice')
-router.register(r'form', gt_form.views.FormView, basename='form')
-router.register(r'form_response',
-                gt_form.views.ResponseView,
-                basename='form_response')
 router.register('about', gt_utils.views.AboutView)
 router.register('calendar_event', gt_school.views.CalendarEventViewSet)
 router.register('tape_box', gt_tape.views.TapeBoxViewSet)

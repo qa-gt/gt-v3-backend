@@ -7,13 +7,15 @@ from django.utils import timezone
 from django_filters.rest_framework import DjangoFilterBackend
 from gt import jencode
 from gt.permissions import RobotCheck
+from gt_im.models import Room, RoomMember
 from gt_notice.options import add_notice
 from requests import get
 from rest_framework.decorators import action
 from rest_framework.exceptions import AuthenticationFailed, ValidationError
 from rest_framework.filters import SearchFilter
 from rest_framework.parsers import FormParser
-from rest_framework.permissions import IsAuthenticated, IsAuthenticatedOrReadOnly
+from rest_framework.permissions import (IsAuthenticated,
+                                        IsAuthenticatedOrReadOnly)
 from rest_framework.response import Response
 from rest_framework.views import APIView
 from rest_framework.viewsets import ModelViewSet, ReadOnlyModelViewSet
@@ -187,6 +189,19 @@ class UserViewSet(ModelViewSet):
             f'{request.user.username}关注了你',
             f'/user/{user.id}',
         )
+
+        # 创建私聊房间
+        room = RoomMember.objects.filter(user=request.user,
+                                         single_chat_with=user)
+        if not room.exists():
+            room = Room.objects.create()
+            RoomMember.objects.create(user=request.user,
+                                      room=room,
+                                      single_chat_with=user)
+            RoomMember.objects.create(user=user,
+                                      room=room,
+                                      single_chat_with=request.user)
+
         return Response({'status': 'success', 'detail': '关注成功'})
 
     @action(methods=['post'],

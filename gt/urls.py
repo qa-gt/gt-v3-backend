@@ -4,6 +4,7 @@ import gt_utils.views
 import gt_notice.views
 import gt_school.views
 import gt_tape.views
+import gt_im.views
 from django.contrib import admin
 from django.urls import include, path, re_path
 from rest_framework.routers import DefaultRouter
@@ -23,6 +24,7 @@ router.register('calendar_event', gt_school.views.CalendarEventViewSet)
 router.register('tape_box', gt_tape.views.TapeBoxViewSet)
 router.register('tape_question', gt_tape.views.TapeQuestionViewSet)
 router.register('tape_reply', gt_tape.views.TapeReplyViewSet)
+router.register('im_room', gt_im.views.RoomView)
 
 urlpatterns = [
     re_path(r'^', include(router.urls)),

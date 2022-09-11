@@ -16,19 +16,18 @@ from pathlib import Path
 
 GT_SERVER = os.environ.get('GTSERVER', "DEVELOPMENT")
 GT_POSTGRESQL = {
-    "HOST": os.environ.get('GTPOSTGRESQLHOST',
-                           "yxzlownserveraddress.yxzl.top"),
-    "PORT": os.environ.get('GTPOSTGRESQLPORT', "5432"),
-    "USER": os.environ.get('GTPOSTGRESQLUSER', "yxzl"),
-    "PASSWORD": os.environ.get('GTPOSTGRESQLPASSWORD', "@yixiangzhilv"),
+    "HOST":
+    os.environ.get('GTPOSTGRESQLHOST', "hccserverhccserverhccserver.qdzx.icu"),
+    "PORT":
+    os.environ.get('GTPOSTGRESQLPORT', "5432"),
+    "USER":
+    os.environ.get('GTPOSTGRESQLUSER', "srv"),
+    "PASSWORD":
+    os.environ.get('GTPOSTGRESQLPASSWORD', ""),
 }
-# Build paths inside the project like this: BASE_DIR / 'subdir'.
+
 BASE_DIR = Path(__file__).resolve().parent.parent
 
-# Quick-start development settings - unsuitable for production
-# See https://docs.djangoproject.com/en/4.0/howto/deployment/checklist/
-
-# SECURITY WARNING: keep the secret key used in production secret!
 SECRET_KEY = 'django-insecure-kg%gl=qy7_^)@ikljm-jvl9r$&3d%^2i$uewj8#t^sq%&7(mxf'
 
 RECAPTCHA_SECRET = "6LdU6xAfAAAAAEnvD6qVraMBJAjb8gX8rzdw_qAv"
@@ -46,8 +45,6 @@ VICY_SECRET = "e878b382e7d94c578727f448962f3142"
 
 ALLOWED_HOSTS = ["*"]
 
-# Application definition
-
 INSTALLED_APPS = [
     'django.contrib.admin',
     'django.contrib.auth',
@@ -55,6 +52,7 @@ INSTALLED_APPS = [
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
+    'channels',
     'rest_framework',
     'django_filters',
     'mdeditor',
@@ -65,6 +63,7 @@ INSTALLED_APPS = [
     'gt_utils.apps.GtUtilsConfig',
     'gt_school.apps.GtSchoolConfig',
     'gt_tape.apps.GtTapeConfig',
+    'gt_im',
 ]
 
 MIDDLEWARE = [
@@ -98,8 +97,7 @@ TEMPLATES = [
 
 WSGI_APPLICATION = 'gt.wsgi.application'
 
-# Database
-# https://docs.djangoproject.com/en/4.0/ref/settings/#databases
+ASGI_APPLICATION = 'gt.asgi.application'
 
 if GT_SERVER.startswith("DEVELOPMENT"):
     GT_SERVER = "DEVELOPMENT"
@@ -115,6 +113,11 @@ if GT_SERVER.startswith("DEVELOPMENT"):
         'default': {
             'BACKEND': 'django.core.cache.backends.locmem.LocMemCache',
             'LOCATION': 'unique-snowflake'
+        }
+    }
+    CHANNEL_LAYERS = {
+        'default': {
+            'BACKEND': 'channels.layers.InMemoryChannelLayer',
         }
     }
 elif GT_SERVER.startswith("TEST"):
@@ -137,6 +140,11 @@ elif GT_SERVER.startswith("TEST"):
             'LOCATION': 'unique-snowflake'
         }
     }
+    CHANNEL_LAYERS = {
+        'default': {
+            'BACKEND': 'channels.layers.InMemoryChannelLayer',
+        }
+    }
 else:
     GT_SERVER = "PRODUCTION"
     print("-----GT_SERVER is PRODUCTION-----")
@@ -157,9 +165,15 @@ else:
             'LOCATION': '127.0.0.1:11211',
         }
     }
-
-# Password validation
-# https://docs.djangoproject.com/en/4.0/ref/settings/#auth-password-validators
+    CHANNEL_LAYERS = {
+        'default': {
+            "BACKEND": "channels_redis.core.RedisChannelLayer",
+            "CONFIG": {
+                "hosts":
+                [os.environ.get('GTREDISURL', 'redis://127.0.0.1:6379/1')],
+            },
+        }
+    }
 
 AUTH_PASSWORD_VALIDATORS = [
     {
@@ -209,9 +223,6 @@ AUTH_USER_MODEL = 'gt_user.User'
 
 X_FRAME_OPTIONS = 'SAMEORIGIN'
 
-# Internationalization
-# https://docs.djangoproject.com/en/4.0/topics/i18n/
-
 LANGUAGE_CODE = 'zh-hans'
 
 TIME_ZONE = 'Asia/Shanghai'
@@ -220,9 +231,6 @@ USE_I18N = True
 
 USE_TZ = True
 
-# Static files (CSS, JavaScript, Images)
-# https://docs.djangoproject.com/en/4.0/howto/static-files/
-
 STATIC_URL = 'static/'
 
 STATIC_ROOT = os.path.join(BASE_DIR, 'static_root')
@@ -230,9 +238,6 @@ STATIC_ROOT = os.path.join(BASE_DIR, 'static_root')
 STATICFILES_DIRS = [
     BASE_DIR / "static",
 ]
-
-# Default primary key field type
-# https://docs.djangoproject.com/en/4.0/ref/settings/#default-auto-field
 
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 

@@ -45,4 +45,4 @@ class MyRoomSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = RoomMember
-        fields = read_only_fields = ('id', 'room', 'single_chat_with')
+        fields = read_only_fields = ('room', 'single_chat_with')

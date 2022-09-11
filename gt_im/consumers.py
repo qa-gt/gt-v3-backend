@@ -30,7 +30,6 @@ class ImConsumer(WebsocketConsumer):
         for room in self.rooms:
             group_discard(room, self.channel_name)
 
-    # 从websocket接收到消息时执行函数
     def receive(self, text_data):
         data = json.loads(text_data)
         action = data['action']

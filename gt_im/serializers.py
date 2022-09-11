@@ -58,7 +58,6 @@ class MyRoomSerializer(serializers.ModelSerializer):
         fields = read_only_fields = ('room', 'single_chat_with', 'unread')
 
     def get_unread(self, obj):
-        print(obj.last_read_time)
         return Message.objects.filter(
             room=obj.room,
             time__gt=obj.last_read_time,

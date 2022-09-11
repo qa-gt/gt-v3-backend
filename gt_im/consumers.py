@@ -6,7 +6,7 @@ from channels.generic.websocket import WebsocketConsumer
 
 from gt._jwt import jdecode
 from gt_user.models import User
-from .models import RoomMember, Message
+from .models import Room, RoomMember, Message
 from .serializers import MessageSerializer
 
 
@@ -20,7 +20,6 @@ class ImConsumer(WebsocketConsumer):
         group_add = async_to_sync(self.channel_layer.group_add)
         rooms = RoomMember.objects.filter(user=self.user)
         self.rooms = ['room_%s' % room.room.id for room in rooms]
-        print(self.rooms)
         for room in self.rooms:
             group_add(room, self.channel_name)
 
@@ -35,9 +34,21 @@ class ImConsumer(WebsocketConsumer):
     def receive(self, text_data):
         data = json.loads(text_data)
         action = data['action']
-        data = data['data']
+        data = data.get('data', {})
 
-        if action == 'new_message':
+        if action == 'heartbeat':
+            self.send(text_data=json.dumps({'action': 'heartbeat'}))
+
+        elif action == 'update_last_read_time':
+            try:
+                room_id = data['room_id']
+                room = RoomMember.objects.get(user=self.user, room_id=room_id)
+                room.last_read_time = data['last_read_time']
+                room.save()
+            except:
+                ...
+
+        elif action == 'new_message':
             if 'room_%s' % data['room_id'] not in self.rooms:
                 self.send(
                     text_data=json.dumps({
@@ -45,13 +56,16 @@ class ImConsumer(WebsocketConsumer):
                         'data': 'You are not in this room.',
                     }))
                 return
+            room = Room.objects.get(id=data['room_id'])
             message = Message(
                 sender=self.user,
-                room_id=data['room_id'],
+                room=room,
                 content=data['content'],
                 content_type=data['content_type'],
             )
             message.save()
+            room.last_message = message
+            room.save()
 
             res = dict(MessageSerializer(message).data)
             res['room_id'] = data['room_id']

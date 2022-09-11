@@ -88,6 +88,10 @@ class RoomMember(models.Model):
         auto_now_add=True,
         verbose_name='加入时间',
     )
+    last_read_time = models.DateTimeField(
+        auto_now_add=True,
+        verbose_name='最后阅读时间',
+    )
 
 
 class Message(models.Model):

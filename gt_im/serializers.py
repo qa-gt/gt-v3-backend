@@ -39,10 +39,27 @@ class SimpleRoomSerializer(serializers.ModelSerializer):
         fields = read_only_fields = ('id', 'name', 'is_group')
 
 
+class UnreadField(serializers.ReadOnlyField):
+
+    def to_internal_value(self, data):
+        pass
+
+    def to_representation(self, value):
+        return value
+
+
 class MyRoomSerializer(serializers.ModelSerializer):
     room = RoomSerializer()
     single_chat_with = SimpleUserSerializer()
+    unread = serializers.SerializerMethodField()
 
     class Meta:
         model = RoomMember
-        fields = read_only_fields = ('room', 'single_chat_with')
+        fields = read_only_fields = ('room', 'single_chat_with', 'unread')
+
+    def get_unread(self, obj):
+        print(obj.last_read_time)
+        return Message.objects.filter(
+            room=obj.room,
+            time__gt=obj.last_read_time,
+        ).count()

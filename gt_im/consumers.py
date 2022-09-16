@@ -1,13 +1,21 @@
+from random import choices
 from urllib.parse import parse_qsl
-import json
 
 from asgiref.sync import async_to_sync
 from channels.generic.websocket import JsonWebsocketConsumer
-
+from django.utils import timezone
 from gt._jwt import jdecode
 from gt_user.models import User
-from .models import Room, RoomMember, Message
-from .serializers import MessageSerializer, MyRoomSerializer
+
+from .models import InviteCode, Message, Room, RoomMember
+from .serializers import MessageSerializer, MyRoomSerializer, RoomSerializer
+
+
+def get_random_string(length=8):
+    return ''.join(choices(
+        'ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789',
+        k=length,
+    ))
 
 
 class ImConsumer(JsonWebsocketConsumer):
@@ -15,7 +23,15 @@ class ImConsumer(JsonWebsocketConsumer):
     def connect(self):
         query = dict(parse_qsl(self.scope['query_string'].decode()))
         user_id = jdecode(query['jwt'][4:])['id']
-        self.user = User.objects.get(id=user_id)
+        user = User.objects.get(id=user_id)
+        if not user.is_authenticated or not user.is_active:
+            self.send_json({
+                'action': 'error',
+                'data': 'Your account is not active.',
+            })
+            self.close()
+            return
+        self.user = user
 
         group_add = async_to_sync(self.channel_layer.group_add)
         rooms = RoomMember.objects.filter(user=self.user)
@@ -45,7 +61,7 @@ class ImConsumer(JsonWebsocketConsumer):
         data = content.get('data', {})
 
         if action == 'heartbeat':
-            # self.send_json({'action': 'heartbeat'})
+            self.send_json({'action': 'heartbeat'})
             return
 
         elif action == 'update_last_read_time':
@@ -102,6 +118,69 @@ class ImConsumer(JsonWebsocketConsumer):
                     'message': MessageSerializer(message, many=True).data[::-1]
                 },
             })
+
+        elif action == 'create_group':
+            room = Room.objects.create(
+                name=data['name'],
+                avatar=data['avatar'],
+                is_group=True,
+            )
+            RoomMember.objects.create(user=self.user, room=room, is_admin=True)
+            code = get_random_string()
+            while InviteCode.objects.filter(code=code).exists():
+                code = get_random_string()
+            InviteCode.objects.create(room=room, code=code, creator=self.user)
+            message = Message.objects.create(
+                room=room,
+                content='您已成功创建群聊',
+            )
+            message.save()
+            room.last_message = message
+            room.save()
+
+            self.send_json({
+                'action': 'create_group',
+                'data': {
+                    'invite_code': code,
+                },
+            })
+
+        elif action == 'join_group':
+            try:
+                code = InviteCode.objects.get(code=data['invite_code'])
+                if code.expire_time and code.expire_time < timezone.now():
+                    self.send_json({
+                        'action': 'error',
+                        'data': '邀请码已过期',
+                    })
+                    return
+                RoomMember.objects.create(user=self.user, room=code.room)
+                message = Message.objects.create(
+                    room=code.room,
+                    content=
+                    f'{self.user.username} 通过 {code.creator.username} 的邀请码加入了群聊',
+                )
+                message.save()
+                code.room.last_message = message
+                code.room.save()
+
+                res = dict(MessageSerializer(message).data)
+                res['room_id'] = code.room.id
+                async_to_sync(self.channel_layer.group_send)(
+                    'room_%s' % code.room.id, {
+                        'type': 'send_to_client',
+                        'action': 'new_message',
+                        'data': res
+                    })
+                self.send_json({
+                    'action': 'join_group',
+                    'data': RoomSerializer(code.room).data,
+                })
+            except:
+                self.send_json({
+                    'action': 'error',
+                    'data': 'Invalid invite code.',
+                })
 
     def send_to_client(self, event):
         self.send_json(event)

@@ -7,7 +7,7 @@ from django.utils import timezone
 from django_filters.rest_framework import DjangoFilterBackend
 from gt import jencode
 from gt.permissions import RobotCheck
-from gt_im.models import Room, RoomMember
+from gt_im.models import Room, RoomMember, Message
 from gt_notice.options import add_notice
 from requests import get
 from rest_framework.decorators import action
@@ -201,6 +201,10 @@ class UserViewSet(ModelViewSet):
             RoomMember.objects.create(user=user,
                                       room=room,
                                       single_chat_with=request.user)
+            Message.objects.create(
+                room=room,
+                content=f'你们已经成为好友，可以开始聊天了',
+            )
 
         return Response({'status': 'success', 'detail': '关注成功'})
 

@@ -54,7 +54,37 @@ class Room(models.Model):
         return self.name
 
     class Meta:
-        verbose_name = verbose_name_plural = "聊天室"
+        verbose_name = verbose_name_plural = '聊天室'
+
+
+class InviteCode(models.Model):
+    code = models.CharField(max_length=100, unique=True, verbose_name='邀请码')
+    room = models.ForeignKey(
+        Room,
+        on_delete=models.CASCADE,
+        verbose_name='聊天室',
+    )
+    create_time = models.DateTimeField(
+        auto_now_add=True,
+        verbose_name='创建时间',
+    )
+    creator = models.ForeignKey(
+        User,
+        on_delete=models.CASCADE,
+        verbose_name='创建者',
+    )
+    expire_time = models.DateTimeField(
+        verbose_name='过期时间',
+        default=None,
+        null=True,
+        blank=True,
+    )
+
+    def __str__(self):
+        return self.code
+
+    class Meta:
+        verbose_name = verbose_name_plural = '邀请码'
 
 
 class RoomMember(models.Model):
@@ -100,6 +130,9 @@ class Message(models.Model):
         on_delete=models.CASCADE,
         related_name='sent_im_messages',
         verbose_name='发送人',
+        default=None,
+        null=True,
+        blank=True,
     )
     room = models.ForeignKey(
         Room,
@@ -122,7 +155,7 @@ class Message(models.Model):
     )
 
     def __str__(self):
-        return f"{self.sender} 发送 {self.content} 到 {self.room}"
+        return f'{self.sender} 发送 {self.content} 到 {self.room}'
 
     class Meta:
-        verbose_name = verbose_name_plural = "聊天消息"
+        verbose_name = verbose_name_plural = '聊天消息'

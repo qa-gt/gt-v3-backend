@@ -64,9 +64,10 @@ class ImConsumer(JsonWebsocketConsumer):
                     'data': 'You are not in this room.',
                 })
                 return
+            room = Room.objects.get(id=data['room_id'])
             message = Message(
                 sender=self.user,
-                room_id=data['room_id'],
+                room=room,
                 content=data['content'],
                 content_type=data['content_type'],
             )

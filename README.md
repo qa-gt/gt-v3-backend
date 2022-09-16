@@ -18,8 +18,9 @@ python3 manage.py makemigrations gt_utils
 python3 manage.py makemigrations gt_form
 python3 manage.py makemigrations gt_school
 python3 manage.py makemigrations gt_notice
+python3 manage.py makemigrations gt_im
 python3 manage.py migrate
-python3 manage.py
+
 python3 manage.py runserver 0.0.0.0:8000
 # or
 # uwsgi uwsgi.ini

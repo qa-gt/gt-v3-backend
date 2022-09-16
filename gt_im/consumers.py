@@ -2,15 +2,15 @@ from urllib.parse import parse_qsl
 import json
 
 from asgiref.sync import async_to_sync
-from channels.generic.websocket import WebsocketConsumer
+from channels.generic.websocket import JsonWebsocketConsumer
 
 from gt._jwt import jdecode
 from gt_user.models import User
 from .models import Room, RoomMember, Message
-from .serializers import MessageSerializer
+from .serializers import MessageSerializer, MyRoomSerializer
 
 
-class ImConsumer(WebsocketConsumer):
+class ImConsumer(JsonWebsocketConsumer):
 
     def connect(self):
         query = dict(parse_qsl(self.scope['query_string'].decode()))
@@ -25,18 +25,28 @@ class ImConsumer(WebsocketConsumer):
 
         self.accept()
 
+        rooms = rooms.order_by('-room__last_message__time')
+        res = MyRoomSerializer(rooms, many=True).data
+        for i in range(len(res)):
+            message = Message.objects.filter(
+                room_id=res[i]['room']['id']).order_by('-time')[:20]
+            res[i]['message'] = MessageSerializer(message,
+                                                  many=True).data[::-1]
+
+        self.send_json({'action': 'init', 'data': res})
+
     def disconnect(self, close_code):
         group_discard = async_to_sync(self.channel_layer.group_discard)
         for room in self.rooms:
             group_discard(room, self.channel_name)
 
-    def receive(self, text_data):
-        data = json.loads(text_data)
-        action = data['action']
-        data = data.get('data', {})
+    def receive_json(self, content):
+        action = content['action']
+        data = content.get('data', {})
 
         if action == 'heartbeat':
-            self.send(text_data=json.dumps({'action': 'heartbeat'}))
+            # self.send_json({'action': 'heartbeat'})
+            return
 
         elif action == 'update_last_read_time':
             try:
@@ -49,16 +59,14 @@ class ImConsumer(WebsocketConsumer):
 
         elif action == 'new_message':
             if 'room_%s' % data['room_id'] not in self.rooms:
-                self.send(
-                    text_data=json.dumps({
-                        'action': 'error',
-                        'data': 'You are not in this room.',
-                    }))
+                self.send_json({
+                    'action': 'error',
+                    'data': 'You are not in this room.',
+                })
                 return
-            room = Room.objects.get(id=data['room_id'])
             message = Message(
                 sender=self.user,
-                room=room,
+                room_id=data['room_id'],
                 content=data['content'],
                 content_type=data['content_type'],
             )
@@ -75,24 +83,24 @@ class ImConsumer(WebsocketConsumer):
                     'data': res
                 })
 
-        elif action == 'get_room_message':
-            if 'room_%s' % data['room_id'] not in self.rooms:
-                self.send(
-                    text_data=json.dumps({
-                        'action': 'error',
-                        'data': 'You are not in this room.',
-                    }))
+        elif action == 'more_message':
+            room_id = data['room_id']
+            if 'room_%s' % room_id not in self.rooms:
+                self.send_json({
+                    'action': 'error',
+                    'data': 'You are not in this room.',
+                })
                 return
-            messages = Message.objects.filter(
-                room_id=data['room_id']).order_by('time')
-            res = MessageSerializer(messages, many=True).data
-            self.send(text_data=json.dumps({
-                'action': 'get_room_message',
+            message = Message.objects.filter(
+                room_id=room_id,
+                time__lt=data['oldest_time']).order_by('-time')[:50]
+            self.send_json({
+                'action': 'more_message',
                 'data': {
-                    'room_id': data['room_id'],
-                    'messages': res,
-                }
-            }))
+                    'room_id': room_id,
+                    'message': MessageSerializer(message, many=True).data[::-1]
+                },
+            })
 
     def send_to_client(self, event):
-        self.send(text_data=json.dumps(event))
+        self.send_json(event)

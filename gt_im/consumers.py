@@ -152,7 +152,7 @@ class ImConsumer(JsonWebsocketConsumer):
 
         elif action == 'join_group':
             try:
-                code = InviteCode.objects.get(code=data['invite_code'].lower())
+                code = InviteCode.objects.get(code=data['invite_code'].upper())
                 if code.expire_time and code.expire_time < timezone.now():
                     self.send_json({
                         'action': 'error',

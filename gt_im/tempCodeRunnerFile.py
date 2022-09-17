@@ -1,0 +1,1 @@
+create_upload_session('/OneDriveImageHosting')

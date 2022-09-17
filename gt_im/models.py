@@ -140,11 +140,20 @@ class Message(models.Model):
         related_name='im_messages',
         verbose_name='聊天室',
     )
-    content = models.TextField(verbose_name='内容')
+    content = models.TextField(verbose_name='内容', default='')
     content_type = models.SmallIntegerField(
         choices=ContentTypeChoice.choices,
         default=ContentTypeChoice.TEXT,
         verbose_name='内容类型',
+    )
+    file = models.ForeignKey(
+        'File',
+        on_delete=models.SET_NULL,
+        related_name='im_messages',
+        verbose_name='文件',
+        default=None,
+        null=True,
+        blank=True,
     )
     time = models.DateTimeField(auto_now_add=True, verbose_name='时间')
     recalled_time = models.DateTimeField(
@@ -159,3 +168,74 @@ class Message(models.Model):
 
     class Meta:
         verbose_name = verbose_name_plural = '聊天消息'
+
+
+class FilePolicy(models.Model):
+    name = models.CharField(max_length=100, verbose_name='名称')
+    create_time = models.DateTimeField(
+        auto_now_add=True,
+        verbose_name='创建时间',
+    )
+    update_time = models.DateTimeField(
+        auto_now=True,
+        verbose_name='更新时间',
+    )
+    client_id = models.CharField(
+        max_length=8191,
+        verbose_name='客户端ID',
+    )
+    client_secret = models.CharField(
+        max_length=8191,
+        verbose_name='客户端密钥',
+    )
+    redirect_uri = models.CharField(
+        max_length=8191,
+        verbose_name='重定向URI',
+    )
+    access_token = models.CharField(
+        max_length=8191,
+        verbose_name='access_token',
+    )
+    refresh_token = models.CharField(
+        max_length=8191,
+        verbose_name='refresh_token',
+    )
+    root = models.CharField(
+        max_length=8191,
+        verbose_name='根目录',
+    )
+    expires_in = models.IntegerField(verbose_name='过期时间')
+
+    def __str__(self):
+        return self.name
+
+    class Meta:
+        verbose_name = verbose_name_plural = '文件策略'
+
+
+class File(models.Model):
+    user = models.ForeignKey(
+        User,
+        on_delete=models.CASCADE,
+        related_name='im_files',
+        verbose_name='用户',
+    )
+    name = models.CharField(max_length=2047, verbose_name='文件名')
+    source_name = models.CharField(max_length=2047, verbose_name='原文件存储路径')
+    size = models.BigIntegerField(verbose_name='文件大小')
+    upload_time = models.DateTimeField(
+        auto_now_add=True,
+        verbose_name='上传时间',
+    )
+    policy = models.ForeignKey(
+        FilePolicy,
+        on_delete=models.CASCADE,
+        verbose_name='文件策略',
+    )
+    uploaded = models.BooleanField(default=False, verbose_name='是否已上传')
+
+    def __str__(self):
+        return self.name
+
+    class Meta:
+        verbose_name = verbose_name_plural = '文件'

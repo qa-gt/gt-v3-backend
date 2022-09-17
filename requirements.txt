@@ -6,6 +6,6 @@ requests~=2.22.0
 django-filter~=21.1
 musicapi~=0.3.3
 django-mdeditor~=0.1.20
-python-memcached~=1.59
+django-redis~=5.2.0
 channels~=3.0.5
 channels-redis~=3.4.1

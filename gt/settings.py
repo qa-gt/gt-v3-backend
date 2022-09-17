@@ -160,9 +160,22 @@ else:
         },
     }
     CACHES = {
+        # 'default': {
+        #     'BACKEND': 'django.core.cache.backends.memcached.MemcachedCache',
+        #     'LOCATION': '127.0.0.1:11211',
+        # }
         'default': {
-            'BACKEND': 'django.core.cache.backends.memcached.MemcachedCache',
-            'LOCATION': '127.0.0.1:11211',
+            'BACKEND': 'django_redis.cache.RedisCache',
+            'LOCATION': os.environ.get('GTREDISURL',
+                                       'redis://127.0.0.1:6379/1'),
+            'OPTIONS': {
+                'CLIENT_CLASS': 'django_redis.client.DefaultClient',
+                'CONNECTION_POOL_KWARGS': {
+                    'max_connections': 100
+                },
+                'DECODE_RESPONSES': True,  # 自动将byte转成字符串
+                'PASSWORD': '',
+            }
         }
     }
     CHANNEL_LAYERS = {

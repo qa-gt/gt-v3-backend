@@ -13,23 +13,31 @@ class ContentField(serializers.ReadOnlyField):
         return value
 
 
+class FileSerializer(serializers.ModelSerializer):
+
+    class Meta:
+        model = File
+        fields = read_only_fields = ('id', 'name', 'size')
+
+
 class MessageSerializer(serializers.ModelSerializer):
     sender = SimpleUserSerializer()
     content = ContentField()
+    file = FileSerializer()
 
     class Meta:
         model = Message
         fields = read_only_fields = ('id', 'sender', 'content', 'content_type',
-                                     'time', 'recalled_time')
+                                     'file', 'time', 'recalled_time')
 
 
 class RoomSerializer(serializers.ModelSerializer):
-    last_message = MessageSerializer()
+    # last_message = MessageSerializer()
 
     class Meta:
         model = Room
         fields = read_only_fields = ('id', 'name', 'avatar', 'is_group',
-                                     'announcement', 'last_message')
+                                     'announcement')
 
 
 class SimpleRoomSerializer(serializers.ModelSerializer):

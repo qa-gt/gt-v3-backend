@@ -1,4 +1,5 @@
 from random import choices
+from time import time
 from urllib.parse import parse_qsl
 
 from asgiref.sync import async_to_sync
@@ -7,7 +8,9 @@ from django.utils import timezone
 from gt._jwt import jdecode
 from gt_user.models import User
 
-from .models import InviteCode, Message, Room, RoomMember
+from .models import (File, FilePolicy, InviteCode, IsAdminChoice, Message,
+                     Room, RoomMember, ContentTypeChoice)
+from .onedrive import create_upload_session, get_download_url
 from .serializers import MessageSerializer, MyRoomSerializer, RoomSerializer
 
 
@@ -125,7 +128,9 @@ class ImConsumer(JsonWebsocketConsumer):
                 avatar=data['avatar'],
                 is_group=True,
             )
-            RoomMember.objects.create(user=self.user, room=room, is_admin=True)
+            RoomMember.objects.create(user=self.user,
+                                      room=room,
+                                      is_admin=IsAdminChoice.OWNER)
             code = get_random_string()
             while InviteCode.objects.filter(code=code).exists():
                 code = get_random_string()
@@ -147,7 +152,7 @@ class ImConsumer(JsonWebsocketConsumer):
 
         elif action == 'join_group':
             try:
-                code = InviteCode.objects.get(code=data['invite_code'])
+                code = InviteCode.objects.get(code=data['invite_code'].lower())
                 if code.expire_time and code.expire_time < timezone.now():
                     self.send_json({
                         'action': 'error',
@@ -181,6 +186,87 @@ class ImConsumer(JsonWebsocketConsumer):
                     'action': 'error',
                     'data': 'Invalid invite code.',
                 })
+
+        elif action == 'upload_file':
+            room_id = data['room_id']
+            if 'room_%s' % room_id not in self.rooms:
+                self.send_json({
+                    'action': 'error',
+                    'data': 'You are not in this room.',
+                })
+                return
+            policy = FilePolicy.objects.get(id=1)
+            source_name = f'{policy.root}/{self.user.id}_{str(int(time()))[-4:]}_{data["file_name"]}'
+            file = File.objects.create(user=self.user,
+                                       name=data['file_name'],
+                                       size=data['file_size'],
+                                       source_name=source_name,
+                                       policy=policy)
+
+            upload_url = create_upload_session(source_name, policy)
+            self.send_json({
+                'action': 'upload_file',
+                'data': {
+                    'file_id': file.id,
+                    'upload_url': upload_url,
+                },
+            })
+
+            message = Message.objects.create(
+                room_id=room_id,
+                sender=self.user,
+                content_type=ContentTypeChoice.FILE,
+                content=file.id,
+                file=file,
+            )
+            message.save()
+            res = dict(MessageSerializer(message).data)
+            res['room_id'] = room_id
+            async_to_sync(self.channel_layer.group_send)('room_%s' % room_id, {
+                'type': 'send_to_client',
+                'action': 'new_message',
+                'data': res
+            })
+
+        elif action == 'upload_finish':
+            file = File.objects.get(id=data['file_id'])
+            if file.user.id != self.user.id:
+                self.send_json({
+                    'action': 'error',
+                    'data': 'You are not the file\'s creator.',
+                })
+                return
+            file.uploaded = True
+            file.save()
+
+        elif action == 'download_file':
+            message = Message.objects.get(id=data['message_id'])
+            if 'room_%s' % message.room.id not in self.rooms:
+                self.send_json({
+                    'action': 'error',
+                    'data': 'You are not in this room.',
+                })
+                return
+            elif message.content_type != ContentTypeChoice.FILE:
+                self.send_json({
+                    'action': 'error',
+                    'data': 'This message is not a file.',
+                })
+                return
+            elif message.file.uploaded == False:
+                self.send_json({
+                    'action': 'error',
+                    'data': 'File is not uploaded.',
+                })
+                return
+            download_url = get_download_url(message.file)
+            self.send_json({
+                'action': 'download_file',
+                'data': {
+                    'file_name': message.file.name,
+                    'download_url': download_url,
+                },
+            })
 
     def send_to_client(self, event):
         self.send_json(event)

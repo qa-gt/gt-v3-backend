@@ -255,18 +255,24 @@ class ImConsumer(JsonWebsocketConsumer):
                 return
             elif message.file.uploaded == False:
                 self.send_json({
-                    'action': 'error',
+                    'action': 'warning',
                     'data': '文件未上传完成',
                 })
                 return
-            download_url = get_download_url(message.file)
-            self.send_json({
-                'action': 'download_file',
-                'data': {
-                    'file_name': message.file.name,
-                    'download_url': download_url,
-                },
-            })
+            try:
+                download_url = get_download_url(message.file)
+                self.send_json({
+                    'action': 'download_file',
+                    'data': {
+                        'file_name': message.file.name,
+                        'download_url': download_url,
+                    },
+                })
+            except:
+                self.send_json({
+                    'action': 'error',
+                    'data': '无法获取文件',
+                })
 
     def send_to_client(self, event):
         self.send_json(event)

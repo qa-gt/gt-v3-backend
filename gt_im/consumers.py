@@ -250,7 +250,7 @@ class ImConsumer(JsonWebsocketConsumer):
             elif message.content_type != ContentTypeChoice.FILE:
                 self.send_json({
                     'action': 'error',
-                    'data': 'This message is not a file.',
+                    'data': '该消息不包含文件',
                 })
                 return
             elif message.file.uploaded == False:
@@ -265,6 +265,7 @@ class ImConsumer(JsonWebsocketConsumer):
                     'action': 'download_file',
                     'data': {
                         'file_name': message.file.name,
+                        'file_size': message.file.size,
                         'download_url': download_url,
                     },
                 })

@@ -54,7 +54,7 @@ class GtCheck:
                     stamp_len = int(decrypted_data[0:3])
                     stamp = int(decrypted_data[3:3 + stamp_len])
                     data = decrypted_data[3 + stamp_len:]
-                    if not -5 < int(time()) - stamp < 5:
+                    if not -15 < int(time()) - stamp < 15:
                         return JsonResponse(
                             {
                                 'status': 'error',

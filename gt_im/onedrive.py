@@ -62,5 +62,3 @@ def get_download_url(file):
 
 if __name__ == '__main__':
     ...
-    # path_to_id('/OneDriveImageHosting')
-    # print(create_upload_session('/OneDriveImageHosting'))

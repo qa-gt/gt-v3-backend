@@ -7,6 +7,7 @@ class ContentTypeChoice(models.IntegerChoices):
     IMAGE = 1, '图片'
     VIDEO = 2, '视频'
     FILE = 3, '文件'
+    AUDIO = 4, '音频'
 
 
 class IsAdminChoice(models.IntegerChoices):

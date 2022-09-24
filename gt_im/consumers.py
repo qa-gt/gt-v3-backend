@@ -62,9 +62,10 @@ class ImConsumer(JsonWebsocketConsumer):
     def receive_json(self, content):
         action = content['action']
         data = content.get('data', {})
+        keep = content.get('keep', None)
 
         if action == 'heartbeat':
-            self.send_json({'action': 'heartbeat'})
+            self.send_json({'action': 'heartbeat', 'keep': keep})
             return
 
         elif action == 'update_last_read_time':
@@ -81,6 +82,7 @@ class ImConsumer(JsonWebsocketConsumer):
                 self.send_json({
                     'action': 'error',
                     'data': 'You are not in this room.',
+                    'keep': keep,
                 })
                 return
             room = Room.objects.get(id=data['room_id'])
@@ -100,7 +102,8 @@ class ImConsumer(JsonWebsocketConsumer):
                 'room_%s' % data['room_id'], {
                     'type': 'send_to_client',
                     'action': 'new_message',
-                    'data': res
+                    'data': res,
+                    'keep': keep,
                 })
 
         elif action == 'more_message':
@@ -109,6 +112,7 @@ class ImConsumer(JsonWebsocketConsumer):
                 self.send_json({
                     'action': 'error',
                     'data': 'You are not in this room.',
+                    'keep': keep,
                 })
                 return
             message = Message.objects.filter(
@@ -120,6 +124,7 @@ class ImConsumer(JsonWebsocketConsumer):
                     'room_id': room_id,
                     'message': MessageSerializer(message, many=True).data[::-1]
                 },
+                'keep': keep,
             })
 
         elif action == 'create_group':
@@ -148,6 +153,7 @@ class ImConsumer(JsonWebsocketConsumer):
                 'data': {
                     'invite_code': code,
                 },
+                'keep': keep,
             })
 
         elif action == 'join_group':
@@ -157,6 +163,7 @@ class ImConsumer(JsonWebsocketConsumer):
                     self.send_json({
                         'action': 'error',
                         'data': '邀请码已过期',
+                        'keep': keep,
                     })
                     return
                 RoomMember.objects.create(user=self.user, room=code.room)
@@ -175,11 +182,13 @@ class ImConsumer(JsonWebsocketConsumer):
                     'room_%s' % code.room.id, {
                         'type': 'send_to_client',
                         'action': 'new_message',
-                        'data': res
+                        'data': res,
+                        'keep': keep,
                     })
                 self.send_json({
                     'action': 'join_group',
                     'data': RoomSerializer(code.room).data,
+                    'keep': keep,
                 })
             except:
                 self.send_json({
@@ -193,6 +202,7 @@ class ImConsumer(JsonWebsocketConsumer):
                 self.send_json({
                     'action': 'error',
                     'data': 'You are not in this room.',
+                    'keep': keep,
                 })
                 return
             policy = FilePolicy.objects.get(id=1)
@@ -210,6 +220,7 @@ class ImConsumer(JsonWebsocketConsumer):
                     'file_id': file.id,
                     'upload_url': upload_url,
                 },
+                'keep': keep,
             })
 
             message = Message.objects.create(
@@ -225,7 +236,8 @@ class ImConsumer(JsonWebsocketConsumer):
             async_to_sync(self.channel_layer.group_send)('room_%s' % room_id, {
                 'type': 'send_to_client',
                 'action': 'new_message',
-                'data': res
+                'data': res,
+                'keep': keep,
             })
 
         elif action == 'upload_finish':
@@ -234,45 +246,52 @@ class ImConsumer(JsonWebsocketConsumer):
                 self.send_json({
                     'action': 'error',
                     'data': 'You are not the file\'s creator.',
+                    'keep': keep,
                 })
                 return
             file.uploaded = True
             file.save()
 
-        elif action == 'download_file':
+        elif action == 'get_direct_url':
             message = Message.objects.get(id=data['message_id'])
             if 'room_%s' % message.room.id not in self.rooms:
                 self.send_json({
                     'action': 'error',
                     'data': 'You are not in this room.',
+                    'keep': keep,
                 })
                 return
-            elif message.content_type != ContentTypeChoice.FILE:
+            elif message.file is None:
+                print(message.id)
                 self.send_json({
                     'action': 'error',
                     'data': '该消息不包含文件',
+                    'keep': keep,
                 })
                 return
             elif message.file.uploaded == False:
                 self.send_json({
                     'action': 'warning',
                     'data': '文件未上传完成',
+                    'keep': keep,
                 })
                 return
             try:
                 download_url = get_download_url(message.file)
                 self.send_json({
-                    'action': 'download_file',
+                    'action': 'get_direct_url',
                     'data': {
                         'file_name': message.file.name,
                         'file_size': message.file.size,
                         'download_url': download_url,
                     },
+                    'keep': keep,
                 })
             except:
                 self.send_json({
                     'action': 'error',
                     'data': '无法获取文件',
+                    'keep': keep,
                 })
 
     def send_to_client(self, event):

@@ -223,10 +223,15 @@ class ImConsumer(JsonWebsocketConsumer):
                 'keep': keep,
             })
 
+            content_type = ContentTypeChoice.FILE
+            if any(
+                    file.name.endswith(i)
+                    for i in ['.mp3', '.wav', '.ogg', '.aac']):
+                content_type = ContentTypeChoice.AUDIO
             message = Message.objects.create(
                 room_id=room_id,
                 sender=self.user,
-                content_type=ContentTypeChoice.FILE,
+                content_type=content_type,
                 content=file.id,
                 file=file,
             )

@@ -232,7 +232,7 @@ class ImConsumer(JsonWebsocketConsumer):
                 room_id=room_id,
                 sender=self.user,
                 content_type=content_type,
-                content=file.id,
+                content=file.name,
                 file=file,
             )
             message.save()

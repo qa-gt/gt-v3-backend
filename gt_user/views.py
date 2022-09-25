@@ -160,11 +160,12 @@ class RegisterView(APIView):
 
 class UserViewSet(ModelViewSet):
     queryset = User.objects.all().order_by('id')
-    filter_backends = [DjangoFilterBackend]
+    filter_backends = [DjangoFilterBackend, SearchFilter]
     permission_classes = [IsAuthenticatedOrReadOnly, UserPermission]
     filterset_fields = [
         'username', 'is_active', 'ban_state', 'is_staff', 'is_superuser'
     ]
+    search_fields = ['id', 'username', 'email']
 
     def get_serializer_class(self):
         if self.request.method == 'PATCH':

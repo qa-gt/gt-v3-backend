@@ -1,12 +1,13 @@
 import jwt
+from datetime import timedelta
 from django.conf import settings
 from django.utils import timezone
 from rest_framework.exceptions import AuthenticationFailed
 
 
-def jencode(payload):
+def jencode(payload, expire_time=0):
     if payload.get('exp') is None:
-        payload['exp'] = timezone.now()
+        payload['exp'] = timezone.now() + timedelta(seconds=int(expire_time))
     jwt_data = jwt.encode(payload=payload,
                           key=settings.SECRET_KEY,
                           algorithm='HS256')

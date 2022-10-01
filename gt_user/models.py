@@ -31,10 +31,9 @@ class YxRoleChoices(models.IntegerChoices):
 
 
 class WeChat(models.Model):
-    unique_id = models.CharField(
-        max_length=50,
-        unique=True,
-        verbose_name='微信ID')
+    unique_id = models.CharField(max_length=50,
+                                 unique=True,
+                                 verbose_name='微信ID')
     is_active = models.BooleanField(default=True, verbose_name='是否有效')
     time = models.DateTimeField(auto_now_add=True, verbose_name='认证时间')
 
@@ -85,6 +84,11 @@ class User(AbstractUser):
                                blank=True,
                                related_name='user',
                                verbose_name='微信认证')
+    unipush_token = models.CharField(max_length=63,
+                                     null=True,
+                                     blank=True,
+                                     default="",
+                                     verbose_name="uniPush token")
 
     def __str__(self):
         return f"[{self.id}] {self.username}"
@@ -103,6 +107,7 @@ class User(AbstractUser):
 
 
 class Group(BaseGroup):
+
     class Meta:
         verbose_name = '组'
         verbose_name_plural = '组'

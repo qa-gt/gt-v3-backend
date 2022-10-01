@@ -93,8 +93,6 @@ class ImConsumer(JsonWebsocketConsumer):
                 content_type=data['content_type'],
             )
             message.save()
-            room.last_message = message
-            room.save()
 
             res = dict(MessageSerializer(message).data)
             res['room_id'] = data['room_id']
@@ -105,6 +103,8 @@ class ImConsumer(JsonWebsocketConsumer):
                     'data': res,
                     'keep': keep,
                 })
+            room.last_message = message
+            room.save()
 
         elif action == 'more_message':
             room_id = data['room_id']
@@ -228,8 +228,9 @@ class ImConsumer(JsonWebsocketConsumer):
                     file.name.endswith(i)
                     for i in ['.mp3', '.wav', '.ogg', '.aac']):
                 content_type = ContentTypeChoice.AUDIO
+            room = Room.objects.get(id=room_id)
             message = Message.objects.create(
-                room_id=room_id,
+                room=room,
                 sender=self.user,
                 content_type=content_type,
                 content=file.name,
@@ -244,6 +245,8 @@ class ImConsumer(JsonWebsocketConsumer):
                 'data': res,
                 'keep': keep,
             })
+            room.last_message = message
+            room.save()
 
         elif action == 'upload_finish':
             file = File.objects.get(id=data['file_id'])

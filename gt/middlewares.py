@@ -10,6 +10,7 @@ from django.http import HttpResponse, JsonResponse
 
 
 class CorsMiddleware:
+
     def __init__(self, get_response):
         self.get_response = get_response
 
@@ -23,6 +24,7 @@ class CorsMiddleware:
 
 
 class GtCheck:
+
     def __init__(self, get_response):
         self.get_response = get_response
 
@@ -35,11 +37,13 @@ class GtCheck:
             if not request.headers.get('User-Agent') or not any(
                     i in request.headers['User-Agent']
                     for i in ['Chrome', 'Safari', 'Mozilla', 'Firefox']):
-                return JsonResponse({
-                    'status': 'error',
-                    'detail': '非法请求'
-                },
-                                    status=403)
+                return JsonResponse(
+                    {
+                        'status': 'error',
+                        'detail': '非法请求',
+                    },
+                    status=403,
+                )
             if request.method == 'OPTIONS':
                 return HttpResponse(status=204)
             if request.method in (
@@ -58,17 +62,23 @@ class GtCheck:
                         return JsonResponse(
                             {
                                 'status': 'error',
-                                'detail': '非法请求, 请校对设备时间或稍后再试'
+                                'detail': '非法请求, 请校对设备时间或稍后再试',
                             },
-                            status=403)
+                            status=403,
+                        )
                     request.META['CONTENT_TYPE'] = 'application/json'
                     setattr(request, '_body', data)
                 except ValueError as e:
-                    return JsonResponse({
-                        'status': 'error',
-                        'detail': '非法请求'
-                    },
-                                        status=403)
+                    if not any(
+                            request.path.startswith(i)
+                            for i in ['/user/login']):
+                        return JsonResponse(
+                            {
+                                'status': 'error',
+                                'detail': '非法请求',
+                            },
+                            status=403,
+                        )
         # Get real IP
         setattr(
             request, 'ip',
@@ -79,6 +89,7 @@ class GtCheck:
 
 
 class GtLog:
+
     def __init__(self, get_response):
         self.get_response = get_response
 

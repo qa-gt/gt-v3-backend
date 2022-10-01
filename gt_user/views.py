@@ -34,6 +34,7 @@ class LoginView(APIView):
     def post(request):
         username = request.data.get('username')
         password = request.data.get('password')
+        expire_time = request.data.get('expire_time', 0)
         user = authenticate(username=username, password=password)
         if not user:
             raise AuthenticationFailed({
@@ -50,7 +51,7 @@ class LoginView(APIView):
         return Response({
             'status': 'success',
             'detail': '登录成功',
-            'token': jencode({'id': user.id}),
+            'token': jencode({'id': user.id}, expire_time),
             'user': DetailUserSerializer(user).data
         })
 

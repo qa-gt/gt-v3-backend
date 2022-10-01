@@ -302,5 +302,9 @@ class ImConsumer(JsonWebsocketConsumer):
                     'keep': keep,
                 })
 
+        elif action == 'update_unipush_token':
+            self.user.unipush_token = data['unipush_token']
+            self.user.save()
+
     def send_to_client(self, event):
         self.send_json(event)

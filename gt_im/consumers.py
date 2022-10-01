@@ -1,3 +1,4 @@
+from json import dumps
 from random import choices
 from time import time
 from urllib.parse import parse_qsl
@@ -7,9 +8,10 @@ from channels.generic.websocket import JsonWebsocketConsumer
 from django.utils import timezone
 from gt._jwt import jdecode
 from gt_user.models import User
+from requests import post
 
-from .models import (File, FilePolicy, InviteCode, IsAdminChoice, Message,
-                     Room, RoomMember, ContentTypeChoice)
+from .models import (ContentTypeChoice, File, FilePolicy, InviteCode,
+                     IsAdminChoice, Message, Room, RoomMember)
 from .onedrive import create_upload_session, get_download_url
 from .serializers import MessageSerializer, MyRoomSerializer, RoomSerializer
 
@@ -105,6 +107,20 @@ class ImConsumer(JsonWebsocketConsumer):
                 })
             room.last_message = message
             room.save()
+
+            if self.user.unipush_token:
+                post(
+                    'https://c3674af2-3891-4fba-80bd-f46ccfccd567.bspapp.com/testUniPush',
+                    data=dumps({
+                        'push_clientid': [self.user.unipush_token],
+                        'title':
+                        '你发送了新消息',
+                        'content':
+                        message.content,
+                        'payload': {}
+                    }),
+                    headers={'Content-Type': 'application/json'},
+                )
 
         elif action == 'more_message':
             room_id = data['room_id']

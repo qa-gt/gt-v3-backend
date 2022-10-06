@@ -21,7 +21,7 @@ from .models import *
 class TopicViewSet(ModelViewSet):
     filter_backends = [DjangoFilterBackend]
     filterset_class = TopicFilter
-    queryset = Topic.objects.all().order_by('id')
+    queryset = Topic.objects.all().order_by('-priority', 'id')
     serializer_class = TopicSerializer
     permission_classes = [IsAdminOrReadOnly]
     pagination_class = None
@@ -31,7 +31,9 @@ class ArticleViewSet(ModelViewSet):
     queryset = Article.objects.filter(
         state__gt=ArticleStateChoices.HIDE).order_by('-id')
     permission_classes = [
-        IsAuthenticatedOrReadOnly, ArticlePermission, RobotCheck,
+        IsAuthenticatedOrReadOnly,
+        ArticlePermission,
+        RobotCheck,
         # RequireWeChat
     ]
     filter_backends = [DjangoFilterBackend, SearchFilter, OrderingFilter]
@@ -45,17 +47,23 @@ class ArticleViewSet(ModelViewSet):
         return ArticleSerializer
 
     def perform_create(self, serializer):
-        start_time = timezone.now() - datetime.timedelta(days=1)
-        articles_count = self.request.user.article.filter(
-            create_time__gt=start_time).count()
-        throttle = settings.ARTICLE_CREATE_THROTTLE[0 if self.request.user.
-                                                    wechat else 1]
-        if articles_count > throttle:
+        if not self.request.user.is_admin:
+            start_time = timezone.now() - datetime.timedelta(days=1)
+            articles_count = self.request.user.article.filter(
+                create_time__gt=start_time).count()
+            throttle = settings.ARTICLE_CREATE_THROTTLE[0 if self.request.user.
+                                                        wechat else 1]
+            if articles_count > throttle:
+                raise ValidationError({
+                    'status': 'error',
+                    'detail': '近24小时发帖次数已达上限'
+                })
+        topic = Topic.objects.get(id=self.request.data['_topic'])
+        if topic.require_admin and not self.request.user.is_admin:
             raise ValidationError({
                 'status': 'error',
-                'detail': '近24小时发帖次数已达上限'
+                'detail': '该话题需要管理员权限',
             })
-        topic = Topic.objects.get(id=self.request.data['_topic'])
         serializer.save(author=self.request.user, topic=topic)
 
     def perform_update(self, serializer):

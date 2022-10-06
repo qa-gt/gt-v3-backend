@@ -1,3 +1,4 @@
+from email.policy import default
 from django.db import models
 from mdeditor.fields import MDTextField
 
@@ -35,6 +36,11 @@ class Topic(models.Model):
                                      default=TopicCommentStateChoices.NORMAL,
                                      choices=TopicCommentStateChoices.choices,
                                      verbose_name='状态')
+    priority = models.IntegerField(default=0, verbose_name='优先级')
+    require_admin = models.BooleanField(
+        default=False,
+        verbose_name='需要管理员',
+    )
 
     def __str__(self):
         return f'[{self.id}] {self.name}'

@@ -5,8 +5,8 @@ from .models import Article, Collect, Comment, Like, Topic
 
 @admin.register(Article)
 class ArticleAdmin(admin.ModelAdmin):
-    list_display = ('id', 'title', 'author', 'topic',
-                    'read_count', 'state', 'create_time', 'update_time')
+    list_display = ('id', 'title', 'author', 'topic', 'read_count', 'state',
+                    'create_time', 'update_time')
 
 
 @admin.register(Collect)
@@ -26,4 +26,4 @@ class LikeAdmin(admin.ModelAdmin):
 
 @admin.register(Topic)
 class TopicAdmin(admin.ModelAdmin):
-    list_display = ('id', 'name', 'description', 'state')
+    list_display = ('id', 'name', 'description', 'state', 'priority')

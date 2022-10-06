@@ -47,7 +47,7 @@ class ArticleViewSet(ModelViewSet):
         return ArticleSerializer
 
     def perform_create(self, serializer):
-        if not self.request.user.is_admin:
+        if not self.request.user.is_staff:
             start_time = timezone.now() - datetime.timedelta(days=1)
             articles_count = self.request.user.article.filter(
                 create_time__gt=start_time).count()
@@ -59,7 +59,7 @@ class ArticleViewSet(ModelViewSet):
                     'detail': '近24小时发帖次数已达上限'
                 })
         topic = Topic.objects.get(id=self.request.data['_topic'])
-        if topic.require_admin and not self.request.user.is_admin:
+        if topic.require_admin and not self.request.user.is_staff:
             raise ValidationError({
                 'status': 'error',
                 'detail': '该话题需要管理员权限',

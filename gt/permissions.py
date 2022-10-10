@@ -29,12 +29,10 @@ class RobotCheck(BasePermission):
             return True
 
         # HCCAPTCHA
-        request_id, verificate_code = request.data.get(
-            'requestId'), request.data.get('verificateCode')
-        if request_id and verificate_code:
+        request_id = request.data.get('hccaptcha')
+        if request_id:
             r = post('https://captcha.qdzx.icu/check', {
                 'request_id': request_id,
-                'verificate_code': verificate_code
             }).json()
             if r['status'] == 'success':
                 return True
